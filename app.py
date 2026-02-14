@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from datetime import datetime, date
+import pytz
 import sqlite3
 from datetime import timedelta
 
@@ -476,8 +477,12 @@ def activity():
         start_times = request.form.getlist("start_time[]")
         end_times = request.form.getlist("end_time[]")
 
-        today = date.today()
-        now_time = datetime.now().replace(second=0, microsecond=0).time()
+
+        ist = pytz.timezone("Asia/Kolkata")
+        now_ist = datetime.now(ist)
+
+        today = now_ist.date()
+        now_time = now_ist.replace(second=0, microsecond=0).time()
 
         selected_date = datetime.strptime(activity_date, "%Y-%m-%d").date()
         selected_str = selected_date.strftime("%Y-%m-%d")
@@ -614,7 +619,7 @@ def activity():
                 end_times[i],
                 duration,
                 clock_out,
-                datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+                datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
             ))
 
         conn.commit()
