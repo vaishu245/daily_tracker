@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Employee Activity Detail</title>
+
+<style>
+body {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    font-family: "Segoe UI";
+    margin: 0;
+    padding: 40px;
+}
+
+.container {
+    background: white;
+    max-width: 900px;
+    margin: auto;
+    padding: 30px;
+    border-radius: 20px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+h2 {
+    text-align: center;
+    margin-bottom: 5px;
+}
+
+.subtitle {
+    text-align: center;
+    color: #666;
+    margin-bottom: 30px;
+}
+
+.date-block {
+    margin-bottom: 25px;
+}
+
+.date-title {
+    font-weight: bold;
+    background: #4b49ac;
+    color: white;
+    padding: 8px 15px;
+    border-radius: 10px;
+    margin-bottom: 10px;
+}
+
+.activity {
+    padding: 10px 15px;
+    background: #f4f6ff;
+    border-radius: 10px;
+    margin-bottom: 8px;
+}
+
+.activity-row {
+    display: flex;
+    justify-content: space-between;
+}
+
+.time {
+    font-weight: bold;
+    color: #333;
+}
+
+.submitted {
+    margin-top: 4px;
+    font-size: 12px;
+    color: #777;
+}
+
+.back {
+    margin-top: 30px;
+    text-align: center;
+}
+
+.back a {
+    text-decoration: none;
+    background: #999;
+    color: white;
+    padding: 12px 25px;
+    border-radius: 25px;
+}
+</style>
+</head>
+
+<body>
+
+<div class="container">
+    <h2>📋 {{ username }}</h2>
+    <div class="subtitle">
+        {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month|int - 1] }}
+        {{ selected_year }}
+    </div>
+
+    {% if grouped %}
+        {% for date, acts in grouped.items() %}
+        <div class="date-block">
+            <div class="date-title">{{ date }}</div>
+
+            {% for a in acts %}
+            <div class="activity">
+                <div class="activity-row">
+                    <div>{{ a.activity }}</div>
+                    <div class="time">{{ a.start }} – {{ a.end }}</div>
+                </div>
+
+                {% if a.submitted %}
+                <div class="submitted">
+                    🕒 Submitted on: {{ a.submitted }}
+                </div>
+                {% endif %}
+            </div>
+            {% endfor %}
+        </div>
+        {% endfor %}
+    {% else %}
+        <p style="text-align:center;">No activities found</p>
+    {% endif %}
+
+<div style="text-align:center; margin-top:20px;">
+    <a href="/manager/export_pdf/{{ username }}?month={{ selected_month }}&year={{ selected_year }}"
+       style="text-decoration:none;
+              background:#4b49ac;
+              color:white;
+              padding:12px 25px;
+              border-radius:25px;">
+        📄 Export to PDF
+    </a>
+</div>
+
+
+    <div class="back">
+        <a href="/manager/dashboard?month={{ selected_month }}&year={{ selected_year }}">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
+</div>
+
+</body>
+</html>

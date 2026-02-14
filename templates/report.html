@@ -1,0 +1,331 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Monthly Report</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<style>
+body {
+    margin: 0;
+    font-family: "Segoe UI", Arial, sans-serif;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    min-height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.container {
+    background: #ffffff;
+    width: 90%;
+    max-width: 1100px;
+    border-radius: 18px;
+    padding: 30px 40px;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+h2 {
+    text-align: center;
+    margin-top: 0;
+    color: #333;
+}
+
+.subtitle {
+    text-align: center;
+    color: #777;
+    margin-bottom: 30px;
+}
+
+.filter {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    margin-bottom: 30px;
+    flex-wrap: wrap;
+}
+
+.filter select, .filter button {
+    padding: 10px 15px;
+    border-radius: 10px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.filter button {
+    background: #667eea;
+    color: white;
+    border: none;
+    cursor: pointer;
+}
+
+.cards-chart-wrapper {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-bottom: 30px;
+}
+
+.cards {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 20px;
+    flex: 1;
+}
+
+.card {
+    background: linear-gradient(135deg, #f8f9ff, #eef1ff);
+    border-radius: 15px;
+    padding: 20px;
+    text-align: center;
+    box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    border: 2px solid #667eea;
+}
+
+.card h3 {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.card p {
+    margin: 10px 0 0;
+    font-size: 22px;
+    font-weight: bold;
+    color: #333;
+}
+
+.doughnut-chart-wrapper {
+    width: 140px;
+    height: 140px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 30px;
+}
+
+th, td {
+    border: 1px solid #666;
+    padding: 12px;
+    text-align: center;
+}
+
+th {
+    background: #f4f6ff;
+}
+
+tr:nth-child(even) {
+    background: #f9f9ff;
+}
+
+a {
+    color: #667eea;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.actions {
+    display: flex;
+    justify-content: center;
+    gap: 20px;
+    margin-top: 30px;
+    flex-wrap: wrap;
+}
+
+.btn {
+    padding: 12px 25px;
+    border-radius: 25px;
+    border: none;
+    cursor: pointer;
+    color: white;
+}
+
+.btn-dashboard { background: #999; }
+.btn-pdf { background: #ff5c5c; }
+
+/* ✅ Responsive */
+@media (max-width: 900px) {
+    .cards {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+@media (max-width: 500px) {
+    .cards {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+</head>
+
+<body>
+
+<div class="container" id="report-content">
+
+<h2>📊 Monthly Activity Report</h2>
+<p class="subtitle">
+{{ name }} |
+{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month|int - 1] }}
+{{ selected_year }}
+</p>
+
+<form method="GET" class="filter">
+<select name="month">
+{% for m in range(1,13) %}
+<option value="{{ '%02d' % m }}" {% if selected_month == '%02d' % m %}selected{% endif %}>
+{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1] }}
+</option>
+{% endfor %}
+</select>
+
+<select name="year">
+{% for y in years %}
+<option value="{{ y }}" {% if selected_year == y|string %}selected{% endif %}>{{ y }}</option>
+{% endfor %}
+</select>
+
+<button type="submit">Apply</button>
+</form>
+
+<div class="cards-chart-wrapper">
+<div class="cards">
+
+<!-- Row 1 -->
+<div class="card"><h3>Productive Hours</h3><p>{{ cards.productive }}</p></div>
+<div class="card"><h3>Working Days</h3><p>{{ cards.working_days }}</p></div>
+<div class="card"><h3>Available Hours</h3><p>{{ cards.available }}</p></div>
+
+<!-- Row 2 -->
+<div class="card"><h3>Idle Hours</h3><p>{{ cards.idle }}</p></div>
+<div class="card"><h3>Productivity %</h3><p>{{ cards.productivity }}</p></div>
+<div class="card"><h3>Leaves Taken</h3><p>{{ cards.leaves }}</p></div>
+
+</div>
+
+<div class="doughnut-chart-wrapper">
+<canvas id="productivityChart"></canvas>
+</div>
+</div>
+
+<table>
+<tr>
+<th>Date</th>
+<th>Total Working Time</th>
+<th>Productivity %</th>
+</tr>
+
+{% for row in data %}
+<tr>
+<td>
+<a href="/report?month={{ selected_month }}&year={{ selected_year }}&day={{ row.date }}">
+{{ row.date }}
+</a>
+</td>
+<td>{{ row.time }}</td>
+<td>{{ row.productivity }}</td>
+</tr>
+{% else %}
+<tr><td colspan="3">No data available</td></tr>
+{% endfor %}
+</table>
+
+{% if selected_day %}
+<h3 style="margin-top:40px;text-align:center;">
+📅 Activities on {{ selected_day }}
+</h3>
+
+<table>
+<tr>
+<th>Activity</th>
+<th>Start Time</th>
+<th>End Time</th>
+<th>Duration</th>
+</tr>
+
+{% for a in day_activities %}
+<tr>
+<td>{{ a.activity_name }}</td>
+<td>{{ a.start_time }}</td>
+<td>{{ a.end_time }}</td>
+<td>{{ a.duration }} min</td>
+</tr>
+{% else %}
+<tr><td colspan="4">No activities found</td></tr>
+{% endfor %}
+</table>
+{% endif %}
+
+<div class="actions" id="action-buttons">
+<form action="/dashboard">
+<button class="btn btn-dashboard">⬅ Dashboard</button>
+</form>
+<button class="btn btn-pdf" onclick="exportPDF()">📄 Export PDF</button>
+</div>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
+<script>
+const productivityPercent = parseFloat("{{ cards.productivity.split('%')[0] }}");
+Chart.register(ChartDataLabels);
+
+new Chart(document.getElementById("productivityChart"), {
+    type: 'doughnut',
+    data: {
+        labels: ['Productive', 'Idle'],
+        datasets: [{
+            data: [productivityPercent, 100 - productivityPercent],
+            backgroundColor: ['#4caf50', '#e0e0e0'],
+            borderWidth: 0
+        }]
+    },
+    options: {
+        cutout: "70%",
+        plugins: {
+            legend: { display: false },
+            datalabels: {
+                formatter: (value, ctx) => ctx.dataIndex === 0 ? value + "%" : "",
+                font: { size: 16, weight: "bold" }
+            }
+        }
+    }
+});
+
+/* PDF EXPORT */
+async function exportPDF() {
+    const { jsPDF } = window.jspdf;
+    const content = document.getElementById("report-content");
+    const buttons = document.getElementById("action-buttons");
+
+    buttons.style.display = "none";
+
+    const canvas = await html2canvas(content, { scale: 2 });
+    const imgData = canvas.toDataURL("image/png");
+
+    const pdf = new jsPDF("p", "mm", "a4");
+    const pdfWidth = pdf.internal.pageSize.getWidth();
+    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
+
+    pdf.addImage(imgData, "PNG", 0, 0, pdfWidth, pdfHeight);
+
+    const username = "{{ name }}".replaceAll(" ", "_");
+    const month = "{{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month|int - 1] }}";
+    const year = "{{ selected_year }}";
+
+    pdf.save(`${username}_Report_${month}_${year}.pdf`);
+
+    buttons.style.display = "flex";
+}
+</script>
+
+</body>
+</html>

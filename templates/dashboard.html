@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: "Segoe UI";
+        }
+        .container {
+            max-width: 800px;
+            margin: 80px auto;
+            text-align: center;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        button {
+            width: 100%;
+            padding: 15px;
+            margin-top: 15px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: none;
+            cursor: pointer;
+        }
+        .primary { background: #4b49ac; color: white; }
+        .secondary { background: #6c63ff; color: white; }
+        .leave { background: #ff9800; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <div class="card">
+        <h2>Welcome, {{ name }} 👋</h2>
+        <p>Your consistency today builds success tomorrow.</p>
+
+        <form action="/activity">
+            <button class="primary">Update Daily Activity</button>
+        </form>
+
+        <form action="/report">
+            <button class="secondary">View Report</button>
+        </form>
+
+        <!-- 🏖 NEW LEAVE BUTTON -->
+        <form action="/leave">
+            <button class="leave">Apply Leave</button>
+        </form>
+
+        <form action="/logout">
+            <button style="background:#ddd;">Logout</button>
+        </form>
+    </div>
+</div>
+
+</body>
+</html>

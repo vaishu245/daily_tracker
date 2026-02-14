@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Apply Leave</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 900px;
+            background: white;
+            padding: 30px 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            text-align: center;
+            margin-top: 0;
+            color: #333;
+        }
+
+        label {
+            font-weight: 600;
+            margin-top: 14px;
+            display: block;
+            color: #444;
+        }
+
+        select, input, textarea {
+            width: 100%;
+            padding: 12px;
+            margin-top: 6px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            font-family: inherit;
+        }
+
+        textarea {
+            resize: vertical;
+            min-height: 90px;
+        }
+
+        button {
+            margin-top: 20px;
+            padding: 12px;
+            width: 100%;
+            border-radius: 25px;
+            border: none;
+            background: #4b49ac;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            font-weight: 600;
+        }
+
+        button:hover {
+            background: #3f3db3;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 35px;
+        }
+
+        th {
+            background: #4b49ac;
+            color: white;
+            padding: 12px;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: center;
+        }
+
+        tr {
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f4f4ff;
+        }
+
+        .badge {
+            padding: 6px 14px;
+            border-radius: 20px;
+            color: white;
+            font-weight: 600;
+            font-size: 13px;
+        }
+
+        .pending { background: #ff9800; }
+        .approved { background: #4caf50; }
+        .rejected { background: #f44336; }
+        .cancelled { background: #9e9e9e; }
+
+        .cancel-btn {
+            padding: 6px 12px;
+            border-radius: 20px;
+            border: none;
+            background: #e53935;
+            color: white;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .cancel-btn:hover {
+            background: #c62828;
+        }
+
+        .empty {
+            text-align: center;
+            padding: 30px;
+            margin-top: 30px;
+            background: #f1fff3;
+            color: #4caf50;
+            font-weight: 600;
+            border-radius: 12px;
+        }
+
+        .footer {
+            margin-top: 30px;
+            text-align: center;
+        }
+
+        .back-link {
+            text-decoration: none;
+            background: #999;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: 0.3s;
+            display: inline-block;
+        }
+
+        .back-link:hover {
+            background: #777;
+        }
+    </style>
+
+    <script>
+        function toggleDates(val) {
+            document.getElementById("single").style.display = val === "single" ? "block" : "none";
+            document.getElementById("range").style.display = val === "multiple" ? "block" : "none";
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🏖 Apply Leave</h2>
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div style="
+        background:#fff3cd;
+        color:#856404;
+        padding:12px 16px;
+        border-radius:12px;
+        margin-bottom:20px;
+        font-weight:600;
+        text-align:center;
+    ">
+        {{ messages[0] }}
+    </div>
+  {% endif %}
+{% endwith %}
+
+    <form method="POST">
+        <label>Leave Type</label>
+        <select name="leave_type" onchange="toggleDates(this.value)" required>
+            <option value="">Select Leave Type</option>
+            <option value="single">One Day</option>
+            <option value="multiple">More Than One Day</option>
+        </select>
+
+        <div id="single" style="display:none;">
+            <label>Select Date</label>
+            <input type="date" name="single_date">
+        </div>
+
+        <div id="range" style="display:none;">
+            <label>From Date</label>
+            <input type="date" name="from_date">
+            <label>To Date</label>
+            <input type="date" name="to_date">
+        </div>
+
+        <!-- ✅ NEW REASON FIELD -->
+        <label>Reason for Leave</label>
+        <textarea name="reason" placeholder="Enter reason for leave..." required></textarea>
+
+        <button type="submit">Submit Leave Request</button>
+    </form>
+
+    <h2 style="margin-top:20px;">📋 Your Leave Requests</h2>
+
+    {% if history %}
+    <table>
+        <tr>
+            <th>Leave Dates</th>
+            <th>Reason</th>
+            <th>Requested On</th>
+            <th>Status</th>
+            <th>Action</th>
+        </tr>
+
+        {% for h in history %}
+        <tr>
+            <td>{{ h["leave_dates"] }}</td>
+            <td>{{ h["reason"] }}</td>
+            <td>{{ h["requested_on"] }}</td>
+            <td>
+                {% if h["status"] == 0 %}
+                    <span class="badge pending">⏳ Pending</span>
+                {% elif h["status"] == 2 %}
+                    <span class="badge approved">✅ Approved</span>
+                {% elif h["status"] == 3 %}
+                    <span class="badge rejected">❌ Rejected</span>
+                {% elif h["status"] == 4 %}
+                    <span class="badge cancelled">🗑 Cancelled</span>
+                {% endif %}
+            </td>
+            <td>
+                {% if h["status"] in [0,2] %}
+                <form method="POST" action="/cancel-leave" style="margin:0;">
+                    <input type="hidden" name="id" value="{{ h['id'] }}">
+                    <button type="submit" class="cancel-btn"
+                        onclick="return confirm('Are you sure you want to cancel this leave?');">
+                        Cancel
+                    </button>
+                </form>
+                {% else %}
+                    -
+                {% endif %}
+            </td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+        <div class="empty">
+            No leave requests yet
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        <a href="/dashboard" class="back-link">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

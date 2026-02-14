@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Reset Requests</title>
+
+    <style>
+        body {
+            margin: 0;
+            min-height: 100vh;
+            font-family: "Segoe UI", Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .container {
+            width: 700px;
+            background: white;
+            padding: 30px 35px;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        th {
+            background: #4b49ac;
+            color: white;
+            padding: 12px;
+            border-radius: 8px 8px 0 0;
+        }
+
+        th, td {
+            padding: 14px;
+            text-align: center;
+        }
+
+        tr {
+            border-bottom: 1px solid #eee;
+        }
+
+        tr:hover {
+            background: #f4f4ff;
+        }
+
+        .btn-approve {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 8px 18px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .btn-approve:hover {
+            background: #43a047;
+            transform: scale(1.05);
+        }
+
+        .empty {
+            text-align: center;
+            padding: 40px;
+            font-size: 18px;
+            color: #4caf50;
+            background: #f1fff3;
+            border-radius: 12px;
+            font-weight: 600;
+        }
+
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+        }
+
+        .back-link {
+            text-decoration: none;
+            background: #999;
+            color: white;
+            padding: 10px 22px;
+            border-radius: 25px;
+            font-weight: 600;
+            transition: 0.3s;
+        }
+
+        .back-link:hover {
+            background: #777;
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="container">
+
+    <h2>🔐 Password Reset Requests</h2>
+
+    {% if requests %}
+        <table>
+            <tr>
+                <th>Employee</th>
+                <th>Action</th>
+            </tr>
+
+            {% for r in requests %}
+            <tr>
+                <td><strong>{{ r["username"] }}</strong></td>
+                <td>
+                    <form method="POST" action="/manager/approve-reset" style="margin:0;">
+                        <input type="hidden" name="username" value="{{ r['username'] }}">
+                        <button type="submit" class="btn-approve">
+                            ✅ Approve Reset
+                        </button>
+                    </form>
+                </td>
+            </tr>
+            {% endfor %}
+        </table>
+    {% else %}
+        <div class="empty">
+            🎉 No pending reset requests
+        </div>
+    {% endif %}
+
+    <div class="footer">
+        <a href="/manager/dashboard" class="back-link">
+            ⬅ Back to Dashboard
+        </a>
+    </div>
+
+</div>
+
+</body>
+</html>

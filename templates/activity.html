@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Daily Activity Tracker</title>
+
+    <style>
+        body {
+            margin: 0;
+            background: #f4f6f9;
+            font-family: "Segoe UI", Arial;
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 40px auto;
+        }
+
+        .card {
+            background: white;
+            padding: 30px 40px;
+            border-radius: 20px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+
+        h2 {
+            margin-top: 0;
+            text-align: center;
+        }
+
+        .subtitle {
+            text-align: center;
+            color: #666;
+            margin-bottom: 30px;
+        }
+
+        .row {
+            display: flex;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+
+        label {
+            font-size: 14px;
+            color: #555;
+        }
+
+        input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            margin-top: 5px;
+        }
+
+        .activityRow {
+            display: grid;
+            grid-template-columns: 2fr 1fr 1fr auto;
+            gap: 15px;
+            align-items: end;
+            margin-bottom: 15px;
+        }
+
+        .remove-btn {
+            background: #ff4d4f;
+            color: white;
+            border: none;
+            padding: 8px 12px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+
+        .add-btn {
+            background: #4b49ac;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 14px;
+            font-size: 16px;
+            border-radius: 30px;
+            border: none;
+            background: #4b49ac;
+            color: white;
+            cursor: pointer;
+            margin-top: 30px;
+        }
+
+        .back-btn {
+            background: #ddd;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+
+        hr {
+            margin: 30px 0;
+            border: none;
+            border-top: 1px solid #eee;
+        }
+    </style>
+
+    <script>
+        function addActivityRow(name="", start="", end="") {
+            const container = document.getElementById("activitiesContainer");
+
+            const row = document.createElement("div");
+            row.className = "activityRow";
+            row.innerHTML = `
+                <div>
+                    <label>Activity Name</label>
+                    <input type="text" name="activity_name[]" value="${name}" required>
+                </div>
+                <div>
+                    <label>Start Time</label>
+                    <input type="time" name="start_time[]" value="${start}" required>
+                </div>
+                <div>
+                    <label>End Time</label>
+                    <input type="time" name="end_time[]" value="${end}" required>
+                </div>
+                <button type="button" class="remove-btn" onclick="removeRow(this)">✖</button>
+            `;
+            container.appendChild(row);
+        }
+
+        function removeRow(btn) {
+            btn.parentElement.remove();
+        }
+    </script>
+</head>
+
+<body>
+
+<div class="container">
+    <div class="card">
+
+{% with messages = get_flashed_messages() %}
+  {% if messages %}
+    <div style="
+        background:#fff3cd;
+        color:#856404;
+        padding:14px 18px;
+        border-radius:12px;
+        margin-bottom:20px;
+        font-weight:600;
+        text-align:center;
+        box-shadow:0 4px 10px rgba(0,0,0,0.08);
+    ">
+        {{ messages[0] }}
+    </div>
+  {% endif %}
+{% endwith %}
+
+        <h2>Daily Activity Tracker</h2>
+        <p class="subtitle">
+            Welcome <b>{{ selected }}</b> 👋  
+            Fill in your activities for the day
+        </p>
+
+        <form method="POST">
+
+            <!-- Date & Clock -->
+            <div class="row">
+                <div style="flex:1">
+                    <label>Select Date</label>
+                    <input type="date"
+                           name="activity_date"
+                           max="{{ max_date }}"
+                           value="{{ form_data.activity_date if form_data else '' }}"
+                           required>
+                </div>
+                <div style="flex:1">
+                    <label>Clock In</label>
+                    <input type="time"
+                           name="clock_in"
+                           value="{{ form_data.clock_in if form_data else '10:00' }}"
+                           required>
+                </div>
+                <div style="flex:1">
+                    <label>Clock Out</label>
+                    <input type="time"
+                           name="clock_out"
+                           value="{{ form_data.clock_out if form_data else '18:00' }}"
+                           required>
+                </div>
+            </div>
+
+            <hr>
+
+            <!-- Activities -->
+            <h3>📝 Activities</h3>
+
+            <div id="activitiesContainer">
+
+                {% if form_data and form_data.activities %}
+                    {% for act in form_data.activities %}
+                        <div class="activityRow">
+                            <div>
+                                <label>Activity Name</label>
+                                <input type="text" name="activity_name[]" value="{{ act.name }}" required>
+                            </div>
+                            <div>
+                                <label>Start Time</label>
+                                <input type="time" name="start_time[]" value="{{ act.start }}" required>
+                            </div>
+                            <div>
+                                <label>End Time</label>
+                                <input type="time" name="end_time[]" value="{{ act.end }}" required>
+                            </div>
+                            <button type="button" class="remove-btn" onclick="removeRow(this)">✖</button>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    <div class="activityRow">
+                        <div>
+                            <label>Activity Name</label>
+                            <input type="text" name="activity_name[]" required>
+                        </div>
+                        <div>
+                            <label>Start Time</label>
+                            <input type="time" name="start_time[]" required>
+                        </div>
+                        <div>
+                            <label>End Time</label>
+                            <input type="time" name="end_time[]" required>
+                        </div>
+                    </div>
+                {% endif %}
+
+            </div>
+
+            <button type="button" class="add-btn" onclick="addActivityRow()">➕ Add Activity</button>
+
+            <button type="submit" class="submit-btn">💾 Save Activity</button>
+
+        </form>
+
+        <form action="/dashboard" style="text-align:center;">
+            <button type="submit" class="back-btn">⬅ Back to Dashboard</button>
+        </form>
+
+    </div>
+</div>
+
+</body>
+</html>

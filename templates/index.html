@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Employee Login</title>
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: "Segoe UI", Arial;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 400px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 30px;
+            border: none;
+            background: #4b49ac;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .back-btn {
+            background: #ddd;
+            color: #333;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+        .pending {
+            text-align: center;
+            color: #ff9800;
+            font-weight: 600;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Employee Login</h2>
+
+    <form method="POST" action="/employee">
+
+        {% if not step %}
+            <select name="username" required>
+                <option value="">Select your name</option>
+                <option>Vaishnavi Tawde</option>
+                <option>Priya Kamble</option>
+                <option>Saurabh Jaiswal</option>
+                <option>Abhishek Giri</option>
+                <option>Priyanka Jadhav</option>
+                <option>Siba Sahu</option>
+                <option>Pratiksha Nikam</option>
+                <option>Saiprasad Malekar</option>
+                <option>Ganinath Bankar</option>
+                <option>Prashant Khaire</option>
+                <option>Nilesh Kamble</option>
+                <option>Pravin Phadtare</option>
+                <option>Vaibhav Dighe</option>
+            </select>
+
+        {% elif step == "create" %}
+            <input type="password" name="password" placeholder="Create password" required>
+
+        {% elif step == "password" %}
+            <input type="password" name="password" placeholder="Enter password" required>
+
+        {% elif step == "pending" %}
+            <div class="pending">
+                ⏳ Password reset request is pending manager approval
+            </div>
+        {% endif %}
+
+        {% if step != "pending" %}
+            <button type="submit">Continue</button>
+        {% endif %}
+
+        {% if step and step != "pending" %}
+            <button
+                type="button"
+                onclick="requestReset()"
+                style="background:#ff5c5c;margin-top:10px;width:100%;">
+                🔐 Reset Password
+            </button>
+        {% endif %}
+
+    </form>
+
+    <!-- BACK BUTTON -->
+    <form action="/" method="get">
+        <button type="submit" class="back-btn">⬅ Back</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+        {% if messages %}
+            <div class="error">{{ messages[0] }}</div>
+        {% endif %}
+    {% endwith %}
+</div>
+
+<script>
+function requestReset() {
+    fetch("/request-reset", { method: "POST" })
+        .then(() => {
+            alert("Reset request sent to manager");
+            location.reload();
+        });
+}
+</script>
+
+</body>
+</html>

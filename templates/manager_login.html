@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Manager Login</title>
+    <style>
+        body {
+            background: #f4f6f9;
+            font-family: "Segoe UI";
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .card {
+            background: white;
+            padding: 40px;
+            border-radius: 16px;
+            width: 400px;
+            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
+        }
+        select, input {
+            width: 100%;
+            padding: 12px;
+            margin-top: 10px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+        }
+        button {
+            width: 100%;
+            margin-top: 20px;
+            padding: 12px;
+            border-radius: 30px;
+            border: none;
+            background: #4b49ac;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        .back-btn {
+            background: #ddd;
+            color: #333;
+        }
+        .error {
+            color: red;
+            text-align: center;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<div class="card">
+    <h2>Manager Login</h2>
+
+    <form method="POST">
+
+        {% if not step %}
+        <select name="manager_name" required>
+            <option value="">Select Manager</option>
+            <option>Vivek Gaur</option>
+        </select>
+
+        {% elif step == "create" %}
+        <input type="password" name="password" placeholder="Create password" required>
+
+        {% elif step == "password" %}
+        <input type="password" name="password" placeholder="Enter password" required>
+        {% endif %}
+
+        <button type="submit">Continue</button>
+    </form>
+
+    <!-- BACK TO WELCOME -->
+    <form action="/">
+        <button type="submit" class="back-btn">⬅ Back</button>
+    </form>
+
+    {% with messages = get_flashed_messages() %}
+    {% if messages %}
+        <div class="error">{{ messages[0] }}</div>
+    {% endif %}
+    {% endwith %}
+</div>
+
+</body>
+</html>
