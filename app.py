@@ -50,25 +50,21 @@ def init_db():
         reset_requested INTEGER DEFAULT 0
     )
     """)
-# ---------------- LEAVE REQUESTS ----------------
+    # ---------------- LEAVE REQUESTS ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS leave_requests (
         id SERIAL PRIMARY KEY,
         username TEXT,
         leave_type TEXT,          -- 'single' or 'multiple'
         leave_dates TEXT,         -- comma-separated dates
+        reason TEXT,
         status INTEGER DEFAULT 0, -- 0=pending, 2=approved, 3=rejected
         requested_on TEXT
     )
     """)
-    cur.execute("PRAGMA table_info(leave_requests)")
-    columns = [column[1] for column in cur.fetchall()]
-
-    if "reason" not in columns:
-        cur.execute("ALTER TABLE leave_requests ADD COLUMN reason TEXT")
 
 
-    # ---------------- ACTIVITIES ----------------
+# ---------------- ACTIVITIES ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS activities (
         id SERIAL PRIMARY KEY,
