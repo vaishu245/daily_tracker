@@ -44,7 +44,7 @@ def init_db():
     # ---------------- USERS ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS users (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         username TEXT UNIQUE,
         password TEXT,
         reset_requested INTEGER DEFAULT 0
@@ -53,7 +53,7 @@ def init_db():
 # ---------------- LEAVE REQUESTS ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS leave_requests (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         username TEXT,
         leave_type TEXT,          -- 'single' or 'multiple'
         leave_dates TEXT,         -- comma-separated dates
@@ -71,7 +71,7 @@ def init_db():
     # ---------------- ACTIVITIES ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS activities (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        id SERIAL PRIMARY KEY,
         username TEXT,
         activity_date TEXT,
         clock_in TEXT,
