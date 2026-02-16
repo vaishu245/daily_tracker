@@ -1,7 +1,8 @@
 from flask import Flask, render_template, request, redirect, session, flash
 from datetime import datetime, date
 import pytz
-import sqlite3
+import psycopg2
+import psycopg2.extras
 from datetime import timedelta
 
 from flask import send_file
@@ -21,9 +22,12 @@ DB_NAME = os.path.join(BASE_DIR, "daily_tracker.db")
 
 # ------------------ DATABASE HELPERS ------------------
 def get_db():
-    conn = sqlite3.connect(DB_NAME)
-    conn.row_factory = sqlite3.Row
+    conn = psycopg2.connect(
+        os.environ.get("DATABASE_URL"),
+        cursor_factory=psycopg2.extras.RealDictCursor
+    )
     return conn
+
 
 def column_exists(table, column):
     conn = get_db()
