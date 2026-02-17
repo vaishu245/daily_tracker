@@ -28,15 +28,6 @@ def get_db():
     )
     return conn
 
-
-def column_exists(table, column):
-    conn = get_db()
-    cur = conn.cursor()
-    cur.execute(f"PRAGMA table_info({table})")
-    exists = any(row["name"] == column for row in cur.fetchall())
-    conn.close()
-    return exists
-
 def init_db():
     conn = get_db()
     cur = conn.cursor()
@@ -64,26 +55,21 @@ def init_db():
     """)
 
 
-# ---------------- ACTIVITIES ----------------
+    # ---------------- ACTIVITIES ----------------
     cur.execute("""
     CREATE TABLE IF NOT EXISTS activities (
         id SERIAL PRIMARY KEY,
         username TEXT,
-        activity_date TEXT,
-        clock_in TEXT,
+        activity_date DATE,
+        clock_in TIME,
         activity_name TEXT,
-        start_time TEXT,
-        end_time TEXT,
+        start_time TIME,
+        end_time TIME,
         duration INTEGER,
-        clock_out TEXT
+        clock_out TIME,
+        submitted_at TIMESTAMP
     )
     """)
-
-    cur.execute("PRAGMA table_info(activities)")
-    columns = [column[1] for column in cur.fetchall()]
-
-    if "submitted_at" not in columns:
-        cur.execute("ALTER TABLE activities ADD COLUMN submitted_at TEXT")
 
 
     # 🔑 IMPORTANT: Index for fast replacement check
@@ -144,7 +130,7 @@ def employee_login():
             conn = get_db()
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
+                "INSERT INTO users (username, password) VALUES (%s, %s)",
                 (username, password)
             )
             conn.commit()
@@ -160,8 +146,8 @@ def employee_login():
             cur = conn.cursor()
             cur.execute("""
                 UPDATE users
-                SET password = ?, reset_requested = 0
-                WHERE username = ?
+                SET password = %s, reset_requested = 0
+                WHERE username = %s
             """, (password, username))
             conn.commit()
             conn.close()
@@ -194,7 +180,7 @@ def request_reset():
     cur.execute("""
         UPDATE users
         SET reset_requested = 1
-        WHERE username = ?
+        WHERE username = %s
     """, (username,))
     conn.commit()
     conn.close()
@@ -234,7 +220,7 @@ def manager_approve_reset():
         UPDATE users
         SET reset_requested = 2,
             password = NULL
-        WHERE username = ?
+        WHERE username = %s
     """, (username,))
     conn.commit()
     conn.close()
@@ -267,7 +253,7 @@ def manager_login():
             conn = get_db()
             cur = conn.cursor()
             cur.execute(
-                "INSERT INTO users (username, password) VALUES (?, ?)",
+                "INSERT INTO users (username, password) VALUES (%s, %s)",
                 (username, password)
             )
             conn.commit()
@@ -336,7 +322,7 @@ def leave():
         cur.execute("""
             SELECT leave_dates
             FROM leave_requests
-            WHERE username = ?
+            WHERE username = %s
               AND status IN (0,2)
         """, (username,))
 
@@ -364,7 +350,7 @@ def leave():
         cur.execute("""
             INSERT INTO leave_requests
             (username, leave_type, leave_dates, status, requested_on, reason)
-            VALUES (?, ?, ?, ?, ?, ?)
+            VALUES (%s, %s, %s, %s, %s, %s)
         """, (
             username,
     		leave_type,
@@ -386,7 +372,7 @@ def leave():
     cur.execute("""
         SELECT id, leave_dates, status, requested_on, reason
         FROM leave_requests
-        WHERE username = ?
+        WHERE username = %s
         ORDER BY id DESC
     """, (username,))
     history = cur.fetchall()
@@ -410,8 +396,8 @@ def cancel_leave():
     cur.execute("""
         UPDATE leave_requests
         SET status = 4
-        WHERE id = ?
-          AND username = ?
+        WHERE id = %s
+          AND username = %s
           AND status IN (0,2)
     """, (leave_id, username))
 
@@ -452,8 +438,8 @@ def handle_leave():
     cur = conn.cursor()
     cur.execute("""
         UPDATE leave_requests
-        SET status = ?
-        WHERE id = ?
+        SET status = %s
+        WHERE id = %s
     """, (status, leave_id))
     conn.commit()
     conn.close()
@@ -509,7 +495,7 @@ def activity():
         cur.execute("""
             SELECT leave_dates
             FROM leave_requests
-            WHERE username = ?
+            WHERE username = %s
               AND status = 2
         """, (username,))
         approved_leaves = cur.fetchall()
@@ -591,10 +577,10 @@ def activity():
             # Delete same slot if exists
             cur.execute("""
                 DELETE FROM activities
-                WHERE username = ?
-                AND activity_date = ?
-                AND start_time = ?
-                AND end_time = ?
+                WHERE username = %s
+                AND activity_date = %s
+                AND start_time = %s
+                AND end_time = %s
             """, (
                 username,
                 activity_date,
@@ -609,7 +595,7 @@ def activity():
                     activity_name, start_time, end_time,
                     duration, clock_out, submitted_at
                 )
-                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+                VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s)
             """, (
                 username,
                 activity_date,
@@ -678,8 +664,8 @@ def manager_dashboard():
             SUM(duration) AS productive_minutes,
             COUNT(DISTINCT activity_date) AS days
         FROM activities
-        WHERE strftime('%m', activity_date) = ?
-          AND strftime('%Y', activity_date) = ?
+        WHERE strftime('%m', activity_date) = %s
+          AND strftime('%Y', activity_date) = %s
         GROUP BY username
     """, (selected_month, selected_year))
 
@@ -807,9 +793,9 @@ def manager_employee_detail(username):
     cur.execute("""
         SELECT activity_date, activity_name, start_time, end_time, submitted_at
         FROM activities
-        WHERE username = ?
-          AND strftime('%m', activity_date) = ?
-          AND strftime('%Y', activity_date) = ?
+        WHERE username = %s
+          AND strftime('%m', activity_date) = %s
+          AND strftime('%Y', activity_date) = %s
         ORDER BY activity_date, start_time
     """, (username, selected_month, selected_year))
 
@@ -861,9 +847,9 @@ def export_employee_pdf(username):
         SELECT activity_date, activity_name,
                start_time, end_time, submitted_at
         FROM activities
-        WHERE username = ?
-          AND strftime('%m', activity_date) = ?
-          AND strftime('%Y', activity_date) = ?
+        WHERE username = %s
+          AND strftime('%m', activity_date) = %s
+          AND strftime('%Y', activity_date) = %s
         ORDER BY activity_date, start_time
     """, (username, month, year))
 
@@ -937,7 +923,7 @@ def report():
     cur.execute("""
         SELECT activity_date, activity_name, start_time, end_time, duration
         FROM activities
-        WHERE username = ?
+        WHERE username = %s
     """, (username,))
     rows = cur.fetchall()
 
@@ -960,7 +946,7 @@ def report():
     cur.execute("""
         SELECT leave_dates
         FROM leave_requests
-        WHERE username = ?
+        WHERE username = %s
           AND status = 2
     """, (username,))
     leave_rows = cur.fetchall()
@@ -1038,8 +1024,8 @@ def report():
         cur.execute("""
             SELECT activity_name, start_time, end_time, duration
             FROM activities
-            WHERE username = ?
-              AND activity_date = ?
+            WHERE username = %s
+              AND activity_date = %s
             ORDER BY start_time
         """, (username, selected_day))
         day_activities = cur.fetchall()
