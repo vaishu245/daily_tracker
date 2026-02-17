@@ -664,8 +664,8 @@ def manager_dashboard():
             SUM(duration) AS productive_minutes,
             COUNT(DISTINCT activity_date) AS days
         FROM activities
-        WHERE strftime('%m', activity_date) = %s
-          AND strftime('%Y', activity_date) = %s
+        WHERE TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
         GROUP BY username
     """, (selected_month, selected_year))
 
@@ -702,7 +702,6 @@ def manager_dashboard():
     data = []
     total_leave_percent = []
 
-    # 🔥 NEW: totals for overall calculation
     total_productive_all = 0
     total_available_all = 0
 
@@ -734,7 +733,6 @@ def manager_dashboard():
 
         total_leave_percent.append(leave_percent)
 
-        # 🔥 accumulate totals for overall
         total_productive_all += productive_hours
         total_available_all += available_hours
 
@@ -749,13 +747,11 @@ def manager_dashboard():
             "leave_percent": leave_percent
         })
 
-    # ---------------- OVERALL PRODUCTIVITY (FIXED) ----------------
     overall_productivity = (
         (total_productive_all / total_available_all) * 100
     ) if total_available_all > 0 else 0
     overall_productivity = round(overall_productivity, 1)
 
-    # ---------------- AVG LEAVE % ----------------
     avg_leave_percent = round(
         sum(total_leave_percent) / (len(total_leave_percent) or 1), 1
     )
@@ -769,7 +765,7 @@ def manager_dashboard():
         selected_year=selected_year,
         years=years,
         avg_leave_percent=avg_leave_percent,
-        overall_productivity=overall_productivity  # 🔥 NEW
+        overall_productivity=overall_productivity
     )
 
 # ------------------ MANAGER EMPLOYEE DETAIL ------------------
@@ -794,15 +790,14 @@ def manager_employee_detail(username):
         SELECT activity_date, activity_name, start_time, end_time, submitted_at
         FROM activities
         WHERE username = %s
-          AND strftime('%m', activity_date) = %s
-          AND strftime('%Y', activity_date) = %s
+          AND TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
         ORDER BY activity_date, start_time
     """, (username, selected_month, selected_year))
 
     rows = cur.fetchall()
     conn.close()
 
-    # ---- Group by date ----
     grouped = {}
     for r in rows:
         date_key = r["activity_date"]
@@ -810,10 +805,9 @@ def manager_employee_detail(username):
         formatted_submitted = ""
         if r["submitted_at"]:
             try:
-                dt = datetime.strptime(r["submitted_at"], "%Y-%m-%d %H:%M:%S")
-                formatted_submitted = dt.strftime("%d %b %Y • %I:%M %p")
+                formatted_submitted = r["submitted_at"].strftime("%d %b %Y • %I:%M %p")
             except:
-                formatted_submitted = r["submitted_at"]
+                formatted_submitted = str(r["submitted_at"])
 
         grouped.setdefault(date_key, []).append({
             "activity": r["activity_name"],
@@ -848,8 +842,8 @@ def export_employee_pdf(username):
                start_time, end_time, submitted_at
         FROM activities
         WHERE username = %s
-          AND strftime('%m', activity_date) = %s
-          AND strftime('%Y', activity_date) = %s
+          AND TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
         ORDER BY activity_date, start_time
     """, (username, month, year))
 
@@ -897,7 +891,6 @@ def export_employee_pdf(username):
         mimetype="application/pdf"
     )
 
-
 # ------------------ REPORT ------------------
 @app.route("/report")
 def report():
@@ -932,7 +925,7 @@ def report():
 
     for row in rows:
         try:
-            d = datetime.strptime(row["activity_date"], "%Y-%m-%d")
+            d = row["activity_date"]
         except:
             continue
 
@@ -958,16 +951,16 @@ def report():
 
         if "to" in txt:
             s, e = txt.split(" to ")
-            d1 = datetime.strptime(s, "%Y-%m-%d")
-            d2 = datetime.strptime(e, "%Y-%m-%d")
+            d1 = datetime.strptime(s, "%Y-%m-%d").date()
+            d2 = datetime.strptime(e, "%Y-%m-%d").date()
             while d1 <= d2:
                 if d1.month == int(selected_month) and d1.year == int(selected_year):
-                    leave_dates_set.add(d1.strftime("%Y-%m-%d"))
+                    leave_dates_set.add(d1)
                 d1 += timedelta(days=1)
         else:
-            d = datetime.strptime(txt, "%Y-%m-%d")
+            d = datetime.strptime(txt, "%Y-%m-%d").date()
             if d.month == int(selected_month) and d.year == int(selected_year):
-                leave_dates_set.add(txt)
+                leave_dates_set.add(d)
 
     # --- build report table ---
     report_data = []
