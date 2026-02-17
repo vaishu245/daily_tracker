@@ -650,12 +650,12 @@ def manager_dashboard():
     years = ["2024", "2025", "2026"]
 
     # ---------------- RESET REQUEST COUNT ----------------
-    cur.execute("SELECT COUNT(*) FROM users WHERE reset_requested = 1")
-    pending_count = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS count FROM users WHERE reset_requested = 1")
+    pending_count = cur.fetchone()["count"]
 
     # ---------------- LEAVE REQUEST COUNT ----------------
-    cur.execute("SELECT COUNT(*) FROM leave_requests WHERE status = 0")
-    leave_pending_count = cur.fetchone()[0]
+    cur.execute("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 0")
+    leave_pending_count = cur.fetchone()["count"]
 
     # ---------------- PRODUCTIVITY ----------------
     cur.execute("""
@@ -1010,6 +1010,7 @@ def report():
         "productivity": f"{productivity:.2f}%",
         "leaves": leave_count
     }
+
 
     # --- selected day activities ---
     day_activities = []
