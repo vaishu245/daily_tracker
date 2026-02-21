@@ -174,7 +174,7 @@
                     <input type="date"
                            name="activity_date"
                            max="{{ max_date }}"
-                           value="{{ form_data.activity_date if form_data else '' }}"
+                           value="{{ form_data.activity_date if form_data else max_date }}"
                            required>
                 </div>
                 <div style="flex:1">
