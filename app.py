@@ -455,6 +455,7 @@ def activity():
     username = session["username"]
 
     if request.method == "POST":
+
         activity_date = request.form.get("activity_date")
         clock_in = request.form.get("clock_in")
         clock_out = request.form.get("clock_out")
@@ -462,7 +463,6 @@ def activity():
         activity_names = request.form.getlist("activity_name[]")
         start_times = request.form.getlist("start_time[]")
         end_times = request.form.getlist("end_time[]")
-
 
         ist = pytz.timezone("Asia/Kolkata")
         now_ist = datetime.now(ist)
@@ -473,7 +473,6 @@ def activity():
         selected_date = datetime.strptime(activity_date, "%Y-%m-%d").date()
         selected_str = selected_date.strftime("%Y-%m-%d")
 
-        # Prepare form data to send back if validation fails
         form_data = {
             "activity_date": activity_date,
             "clock_in": clock_in,
@@ -491,7 +490,7 @@ def activity():
         conn = get_db()
         cur = conn.cursor()
 
-        # 🚫 BLOCK APPROVED LEAVE DATE
+        # ---------------- BLOCK APPROVED LEAVE ----------------
         cur.execute("""
             SELECT leave_dates
             FROM leave_requests
@@ -524,7 +523,7 @@ def activity():
                     form_data=form_data
                 )
 
-        # 🚫 BLOCK FUTURE DATE
+        # ---------------- BLOCK FUTURE DATE ----------------
         if selected_date > today:
             flash("⛔ You cannot submit activity for future date")
             conn.close()
@@ -535,7 +534,30 @@ def activity():
                 form_data=form_data
             )
 
-        # 🔁 PROCESS ACTIVITIES
+        # ---------------- FIX CLOCK-IN (FIRST TIME ONLY) ----------------
+        cur.execute("""
+            SELECT clock_in
+            FROM activities
+            WHERE username = %s
+              AND activity_date = %s
+            ORDER BY submitted_at ASC
+            LIMIT 1
+        """, (username, activity_date))
+
+        first_entry = cur.fetchone()
+
+        if first_entry and first_entry["clock_in"]:
+            clock_in = first_entry["clock_in"]
+
+        # ---------------- FORCE CLOCK-OUT (LAST SUBMISSION WINS) ----------------
+        cur.execute("""
+            UPDATE activities
+            SET clock_out = %s
+            WHERE username = %s
+              AND activity_date = %s
+        """, (clock_out, username, activity_date))
+
+        # ---------------- PROCESS ACTIVITIES ----------------
         for i in range(len(activity_names)):
 
             if not activity_names[i].strip():
@@ -544,7 +566,6 @@ def activity():
             start_t = datetime.strptime(start_times[i], "%H:%M").time()
             end_t = datetime.strptime(end_times[i], "%H:%M").time()
 
-            # 🚫 End must be after start
             if end_t <= start_t:
                 flash("⛔ End time must be after start time")
                 conn.close()
@@ -555,10 +576,35 @@ def activity():
                     form_data=form_data
                 )
 
-            # 🚫 FUTURE ACTIVITY TIME CHECK (ONLY FOR TODAY)
             if selected_date == today:
                 if start_t > now_time or end_t > now_time:
                     flash("⛔ Activity start or end time cannot be in the future")
+                    conn.close()
+                    return render_template(
+                        "activity.html",
+                        selected=username,
+                        max_date=today.isoformat(),
+                        form_data=form_data
+                    )
+
+            # ---------------- PREVENT OVERLAPPING ACTIVITIES ----------------
+            cur.execute("""
+                SELECT start_time, end_time
+                FROM activities
+                WHERE username = %s
+                  AND activity_date = %s
+            """, (username, activity_date))
+
+            existing_rows = cur.fetchall()
+
+            for existing in existing_rows:
+                ex_start = datetime.combine(selected_date, existing["start_time"])
+                ex_end = datetime.combine(selected_date, existing["end_time"])
+                new_start = datetime.combine(selected_date, start_t)
+                new_end = datetime.combine(selected_date, end_t)
+
+                if new_start < ex_end and new_end > ex_start:
+                    flash("⛔ Activity time overlaps with existing activity")
                     conn.close()
                     return render_template(
                         "activity.html",
@@ -574,7 +620,6 @@ def activity():
                 ).total_seconds() / 60
             )
 
-            # Delete same slot if exists
             cur.execute("""
                 DELETE FROM activities
                 WHERE username = %s
@@ -588,7 +633,6 @@ def activity():
                 end_times[i]
             ))
 
-            # Insert activity
             cur.execute("""
                 INSERT INTO activities (
                     username, activity_date, clock_in,
@@ -605,7 +649,7 @@ def activity():
                 end_times[i],
                 duration,
                 clock_out,
-                datetime.now(pytz.timezone("Asia/Kolkata")).strftime("%Y-%m-%d %H:%M:%S")
+                datetime.now(pytz.timezone("Asia/Kolkata"))
             ))
 
         conn.commit()
@@ -894,6 +938,7 @@ def export_employee_pdf(username):
 # ------------------ REPORT ------------------
 @app.route("/report")
 def report():
+
     if "username" not in session:
         return redirect("/employee")
 
@@ -904,6 +949,7 @@ def report():
     selected_day = request.args.get("day")
 
     today = date.today()
+
     if not selected_month:
         selected_month = f"{today.month:02d}"
     if not selected_year:
@@ -912,18 +958,21 @@ def report():
     conn = get_db()
     cur = conn.cursor()
 
-    # --- fetch all activities ---
+    # -------- FETCH ALL ACTIVITIES --------
     cur.execute("""
-        SELECT activity_date, activity_name, start_time, end_time, duration
+        SELECT activity_date, activity_name, start_time, end_time,
+               duration, clock_in, clock_out
         FROM activities
         WHERE username = %s
     """, (username,))
     rows = cur.fetchall()
 
     daily_minutes = {}
+    daily_clock = {}
     available_years = set()
 
     for row in rows:
+
         try:
             d = row["activity_date"]
         except:
@@ -932,10 +981,23 @@ def report():
         available_years.add(d.year)
 
         if d.month == int(selected_month) and d.year == int(selected_year):
-            daily_minutes.setdefault(row["activity_date"], 0)
-            daily_minutes[row["activity_date"]] += row["duration"]
 
-    # --- fetch approved leaves ---
+            daily_minutes.setdefault(d, 0)
+            daily_minutes[d] += row["duration"]
+
+            if d not in daily_clock:
+                daily_clock[d] = {
+                    "clock_in": row["clock_in"],
+                    "clock_out": row["clock_out"]
+                }
+            else:
+                if not daily_clock[d]["clock_in"] and row["clock_in"]:
+                    daily_clock[d]["clock_in"] = row["clock_in"]
+
+                if row["clock_out"]:
+                    daily_clock[d]["clock_out"] = row["clock_out"]
+
+    # -------- FETCH APPROVED LEAVES --------
     cur.execute("""
         SELECT leave_dates
         FROM leave_requests
@@ -947,12 +1009,14 @@ def report():
     leave_dates_set = set()
 
     for r in leave_rows:
+
         txt = r["leave_dates"]
 
         if "to" in txt:
             s, e = txt.split(" to ")
             d1 = datetime.strptime(s, "%Y-%m-%d").date()
             d2 = datetime.strptime(e, "%Y-%m-%d").date()
+
             while d1 <= d2:
                 if d1.month == int(selected_month) and d1.year == int(selected_year):
                     leave_dates_set.add(d1)
@@ -962,7 +1026,7 @@ def report():
             if d.month == int(selected_month) and d.year == int(selected_year):
                 leave_dates_set.add(d)
 
-    # --- build report table ---
+    # -------- BUILD REPORT TABLE --------
     report_data = []
     total_minutes = 0
     leave_count = len(leave_dates_set)
@@ -970,11 +1034,14 @@ def report():
     all_dates = set(daily_minutes.keys()) | leave_dates_set
 
     for d in sorted(all_dates):
+
         if d in leave_dates_set:
             report_data.append({
                 "date": d,
                 "time": "Leave",
-                "productivity": "-"
+                "productivity": "-",
+                "clock_in": "-",
+                "clock_out": "-"
             })
         else:
             mins = daily_minutes.get(d, 0)
@@ -986,12 +1053,14 @@ def report():
             report_data.append({
                 "date": d,
                 "time": f"{hrs} hours {rem} min",
-                "productivity": f"{productivity_day:.2f}%"
+                "productivity": f"{productivity_day:.2f}%",
+                "clock_in": daily_clock.get(d, {}).get("clock_in"),
+                "clock_out": daily_clock.get(d, {}).get("clock_out")
             })
 
             total_minutes += mins
 
-    # --- cards calculations ---
+    # -------- CARDS --------
     productive_hours = total_minutes / 60
     working_days = len(daily_minutes)
     available_hours = working_days * 7
@@ -1011,9 +1080,9 @@ def report():
         "leaves": leave_count
     }
 
-
-    # --- selected day activities ---
+    # -------- SELECTED DAY ACTIVITIES --------
     day_activities = []
+
     if selected_day:
         cur.execute("""
             SELECT activity_name, start_time, end_time, duration
