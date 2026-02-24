@@ -898,36 +898,78 @@ def export_employee_pdf(username):
     filename = f"{username}_{month_name}_{year}_Activities.pdf"
 
     buffer = BytesIO()
-    doc = SimpleDocTemplate(buffer, pagesize=A4)
+    doc = SimpleDocTemplate(
+        buffer,
+        pagesize=A4,
+        rightMargin=30,
+        leftMargin=30,
+        topMargin=30,
+        bottomMargin=30
+    )
+
     elements = []
     styles = getSampleStyleSheet()
 
-    elements.append(Paragraph(f"Employee: {username}", styles["Heading1"]))
+    # Header
+    elements.append(Paragraph(f"<b>Employee Activity Report</b>", styles["Heading1"]))
     elements.append(Spacer(1, 0.3 * inch))
-    elements.append(Paragraph(f"Month: {month_name} {year}", styles["Heading2"]))
-    elements.append(Spacer(1, 0.3 * inch))
+    elements.append(Paragraph(f"<b>Employee:</b> {username}", styles["Normal"]))
+    elements.append(Paragraph(f"<b>Month:</b> {month_name} {year}", styles["Normal"]))
+    elements.append(Spacer(1, 0.4 * inch))
 
-    data = [["Date", "Activity", "Start", "End", "Submitted"]]
+    # Table header
+    data = [[
+        "Date",
+        "Activity",
+        "Start",
+        "End",
+        "Submitted"
+    ]]
 
     for r in rows:
+
+        activity_date = r["activity_date"].strftime("%d-%b-%Y") if r["activity_date"] else "-"
+        start = r["start_time"].strftime("%H:%M") if r["start_time"] else "-"
+        end = r["end_time"].strftime("%H:%M") if r["end_time"] else "-"
+
+        if r["submitted_at"]:
+            try:
+                submitted = r["submitted_at"].strftime("%d-%b-%Y %I:%M %p")
+            except:
+                submitted = str(r["submitted_at"])
+        else:
+            submitted = "-"
+
         data.append([
-            r["activity_date"],
-            r["activity_name"],
-            r["start_time"],
-            r["end_time"],
-            r["submitted_at"] or "-"
+            activity_date,
+            Paragraph(r["activity_name"], styles["Normal"]),
+            start,
+            end,
+            submitted
         ])
 
-    table = Table(data, repeatRows=1)
+    table = Table(
+        data,
+        repeatRows=1,
+        colWidths=[80, 200, 60, 60, 100]  # FIXED WIDTHS
+    )
+
     table.setStyle(TableStyle([
-        ('BACKGROUND', (0,0), (-1,0), colors.lightgrey),
-        ('GRID', (0,0), (-1,-1), 0.5, colors.grey),
+        ('BACKGROUND', (0, 0), (-1, 0), colors.lightgrey),
+        ('GRID', (0, 0), (-1, -1), 0.5, colors.grey),
+        ('ALIGN', (2, 1), (3, -1), 'CENTER'),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+        ('LEFTPADDING', (0, 0), (-1, -1), 6),
+        ('RIGHTPADDING', (0, 0), (-1, -1), 6),
+        ('TOPPADDING', (0, 0), (-1, -1), 4),
+        ('BOTTOMPADDING', (0, 0), (-1, -1), 4),
     ]))
 
     elements.append(table)
     doc.build(elements)
 
     buffer.seek(0)
+
     return send_file(
         buffer,
         as_attachment=True,
