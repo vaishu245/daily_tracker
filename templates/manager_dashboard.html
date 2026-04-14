@@ -286,12 +286,19 @@ button {
     <label>
         Month<br>
         <select name="month">
+
+            <option value="all"
+                {% if selected_month == "all" %}selected{% endif %}>
+                All Months
+            </option>
+
             {% for m in range(1,13) %}
             <option value="{{ '%02d' % m }}"
                 {% if selected_month == '%02d' % m %}selected{% endif %}>
                 {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][m-1] }}
             </option>
             {% endfor %}
+
         </select>
     </label>
 
@@ -353,7 +360,9 @@ button {
     <th>Available Hrs</th>
     <th>Ideal Hrs</th>
     <th>Productivity %</th>
+    <th>Productivity (Incl Leaves)</th>
     <th>Leaves Taken</th>
+    <th>Comp-Off</th>
 </tr>
 
 {% for e in data %}
@@ -368,7 +377,9 @@ button {
     <td>{{ e.available }}</td>
     <td>{{ e.ideal }}</td>
     <td>{{ e.productivity }}%</td>
+    <td>{{ e.productivity_with_leave }}%</td>
     <td>{{ e.leave_days }}</td>
+    <td>{{ e.compoff_days }}</td>
 </tr>
 {% endfor %}
 </table>
@@ -383,19 +394,21 @@ button {
 
 </div>
 
-/*
+
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-*/
+
 
 <script>
-Chart.register(ChartDataLabels);
+if (typeof ChartDataLabels !== "undefined") {
+    Chart.register(ChartDataLabels);
+}
 
 /* ---------------- CHART ---------------- */
 
-const prodPercent = {{ overall_productivity }};
+const prodPercent = {{ overall_productivity or 0 }};
 const idlePercent = (100 - prodPercent).toFixed(1);
 
 
@@ -456,8 +469,14 @@ async function exportPDF() {
     const selectedMonth = "{{ selected_month }}";
     const selectedYear = "{{ selected_year }}";
 
-    const monthIndex = parseInt(selectedMonth) - 1;
-    const monthName = monthNames[monthIndex] || "Report";
+    let monthName;
+
+    if (selectedMonth === "all") {
+        monthName = "Full_Year";
+    } else {
+        const monthIndex = parseInt(selectedMonth) - 1;
+        monthName = monthNames[monthIndex];
+    }
 
     const fileName = `Team_Productivity_Report_${monthName}_${selectedYear}.pdf`;
 

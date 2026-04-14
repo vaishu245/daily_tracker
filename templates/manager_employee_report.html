@@ -11,6 +11,40 @@ body {
     padding: 40px;
 }
 
+/* FLOATING MENU */
+.floating-menu {
+    position: fixed;
+    top: 40px;
+    left: 25px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    z-index: 999;
+}
+
+/* BUTTON STYLE */
+.floating-menu a {
+    text-decoration: none;
+    color: white;
+    padding: 14px 22px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 16px;
+    letter-spacing: 0.5px;
+    border: 2px solid black;
+    box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    transition: all 0.25s ease;
+}
+
+.btn-pdf { background: #ff4b2b; }
+.btn-back { background: #4b49ac; }
+
+.floating-menu a:hover {
+    transform: translateX(6px);
+    box-shadow: 0 12px 28px rgba(0,0,0,0.35);
+}
+
+/* MAIN CARD */
 .container {
     background: white;
     max-width: 900px;
@@ -67,28 +101,52 @@ h2 {
     color: #777;
 }
 
-.back {
-    margin-top: 30px;
-    text-align: center;
-}
+/* MOBILE */
+@media (max-width: 768px) {
+    body {
+        padding: 20px;
+    }
 
-.back a {
-    text-decoration: none;
-    background: #999;
-    color: white;
-    padding: 12px 25px;
-    border-radius: 25px;
+    .floating-menu {
+        top: 15px;
+        left: 10px;
+    }
+
+    .floating-menu a {
+        font-size: 12px;
+        padding: 10px 14px;
+    }
 }
 </style>
 </head>
 
 <body>
 
+<!-- ✅ FLOATING ACTION BUTTONS -->
+<div class="floating-menu">
+    <a href="/manager/export_pdf/{{ username }}?month={{ selected_month }}&year={{ selected_year }}"
+       class="btn-pdf">
+        📄 Export PDF
+    </a>
+
+    <a href="/manager/dashboard?month={{ selected_month }}&year={{ selected_year }}"
+       class="btn-back">
+        ⬅ Back
+    </a>
+</div>
+
 <div class="container">
+
     <h2>📋 {{ username }}</h2>
+
+    <!-- ✅ SUPPORTS BOTH MONTH & FULL YEAR -->
     <div class="subtitle">
-        {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month|int - 1] }}
-        {{ selected_year }}
+        {% if selected_month == "all" %}
+            Full Year {{ selected_year }}
+        {% else %}
+            {{ ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][selected_month|int - 1] }}
+            {{ selected_year }}
+        {% endif %}
     </div>
 
     {% if grouped %}
@@ -116,23 +174,6 @@ h2 {
         <p style="text-align:center;">No activities found</p>
     {% endif %}
 
-<div style="text-align:center; margin-top:20px;">
-    <a href="/manager/export_pdf/{{ username }}?month={{ selected_month }}&year={{ selected_year }}"
-       style="text-decoration:none;
-              background:#4b49ac;
-              color:white;
-              padding:12px 25px;
-              border-radius:25px;">
-        📄 Export to PDF
-    </a>
-</div>
-
-
-    <div class="back">
-        <a href="/manager/dashboard?month={{ selected_month }}&year={{ selected_year }}">
-            ⬅ Back to Dashboard
-        </a>
-    </div>
 </div>
 
 </body>

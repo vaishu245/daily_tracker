@@ -62,6 +62,15 @@
             background: #f4f4ff;
         }
 
+        .badge-compoff {
+            background:#4caf50;
+            color:white;
+            padding:3px 10px;
+            border-radius:12px;
+            font-size:12px;
+            margin-left:6px;
+        }
+
         .btn-approve {
             background: #4caf50;
             color: white;
@@ -136,6 +145,7 @@
             <tr>
                 <th>Employee</th>
                 <th>Leave Dates</th>
+                <th>Type</th>
                 <th>Reason</th>
                 <th>Approve</th>
                 <th>Reject</th>
@@ -144,9 +154,25 @@
             {% for r in requests %}
             <tr>
                 <td><strong>{{ r["username"] }}</strong></td>
-                <td>{{ r["leave_dates"] }}</td>
+
+                <td>
+                    {{ r["leave_dates"] }}
+
+                    {% if r["leave_type"] == "compoff" %}
+                        <span class="badge-compoff">Comp-Off</span>
+                    {% endif %}
+                </td>
+
+                <!-- ✅ CLEAN TYPE COLUMN -->
+                <td>
+                    {{ "Comp-Off" if r["leave_type"] == "compoff" else "Leave" }}
+                </td>
+
+                <!-- ✅ SAFE REASON COLUMN -->
                 <td style="max-width:200px; word-wrap:break-word;">
                     {{ r["reason"] if r["reason"] else "-" }}
+                </td>
+
                 <td>
                     <form method="POST" action="/manager/handle-leave" style="margin:0;">
                         <input type="hidden" name="id" value="{{ r['id'] }}">
@@ -155,6 +181,7 @@
                         </button>
                     </form>
                 </td>
+
                 <td>
                     <form method="POST" action="/manager/handle-leave" style="margin:0;">
                         <input type="hidden" name="id" value="{{ r['id'] }}">

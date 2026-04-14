@@ -151,8 +151,11 @@
 
     <script>
         function toggleDates(val) {
-            document.getElementById("single").style.display = val === "single" ? "block" : "none";
-            document.getElementById("range").style.display = val === "multiple" ? "block" : "none";
+            document.getElementById("single").style.display =
+                (val === "single" || val === "compoff") ? "block" : "none";
+
+            document.getElementById("range").style.display =
+                val === "multiple" ? "block" : "none";
         }
     </script>
 </head>
@@ -185,6 +188,10 @@
             <option value="">Select Leave Type</option>
             <option value="single">One Day</option>
             <option value="multiple">More Than One Day</option>
+
+            {% if is_comp_off_eligible %}
+                <option value="compoff">Comp-Off Leave</option>
+            {% endif %}
         </select>
 
         <div id="single" style="display:none;">
@@ -199,7 +206,6 @@
             <input type="date" name="to_date">
         </div>
 
-        <!-- ✅ NEW REASON FIELD -->
         <label>Reason for Leave</label>
         <textarea name="reason" placeholder="Enter reason for leave..." required></textarea>
 
@@ -220,7 +226,12 @@
 
         {% for h in history %}
         <tr>
-            <td>{{ h["leave_dates"] }}</td>
+            <td>
+                {{ h["leave_dates"] }}
+                {% if h["leave_type"] == "compoff" %}
+                    <span style="color:#4caf50; font-weight:600;">(Comp-Off)</span>
+                {% endif %}
+            </td>
             <td>{{ h["reason"] }}</td>
             <td>{{ h["requested_on"] }}</td>
             <td>
