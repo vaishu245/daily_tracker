@@ -810,7 +810,7 @@ def manager_dashboard():
         working_days = r["days"] or 0
         available_hours = working_days * 7
 
-        ideal_hours = max(available_hours - productive_hours, 0)
+        ideal_hours = round(max(available_hours - productive_hours, 0), 2)
         productivity = round((productive_hours / available_hours) * 100, 1) if available_hours else 0
 
         leave_days = leave_map.get(username, 0)
