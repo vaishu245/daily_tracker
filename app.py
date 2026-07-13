@@ -14,16 +14,6 @@ from reportlab.lib.pagesizes import A4
 import os
 from io import BytesIO
 
-COMPOFF_ELIGIBLE_USERS = [
-    "Pratiksha Nikam",
-    "Saiprasad Malekar",
-    "Gahininath Bankar",
-    "Prashant Khaire",
-    "Nilesh Kamble",
-    "Pravin Phadtare",
-    "Vaibhav Dighe"
-]
-
 app = Flask(__name__)
 app.secret_key = "daily_tracker_secret"
 
@@ -305,25 +295,13 @@ def leave():
         reason = request.form.get("reason")
         selected_dates = []
 
-        # ✅ SINGLE + COMPOFF
-        if leave_type == "single" or leave_type == "compoff":
+        if leave_type == "single":
             d = request.form.get("single_date")
-
-            if not d:
-                flash("❌ Please select a date")
-                return redirect("/leave")
-
             selected_dates = [d]
             dates_text = d
-
-        # ✅ MULTIPLE
-        elif leave_type == "multiple":
+        else:
             from_date = request.form.get("from_date")
             to_date = request.form.get("to_date")
-
-            if not from_date or not to_date:
-                flash("❌ Please select both From and To dates")
-                return redirect("/leave")
 
             d1 = datetime.strptime(from_date, "%Y-%m-%d")
             d2 = datetime.strptime(to_date, "%Y-%m-%d")
@@ -338,20 +316,17 @@ def leave():
 
             dates_text = f"{from_date} to {to_date}"
 
-        else:
-            flash("❌ Invalid leave type")
-            return redirect("/leave")
-
         conn = get_db()
         cur = conn.cursor()
 
-        # Check overlapping leaves
+        # Ignore rejected (3) and cancelled (4)
         cur.execute("""
             SELECT leave_dates
             FROM leave_requests
             WHERE username = %s
               AND status IN (0,2)
         """, (username,))
+
         existing = cur.fetchall()
 
         for r in existing:
@@ -379,11 +354,11 @@ def leave():
             VALUES (%s, %s, %s, %s, %s, %s)
         """, (
             username,
-            leave_type,
+    		leave_type,
             dates_text,
-            0,
-            datetime.now().strftime("%Y-%m-%d %H:%M"),
-            reason
+    		0,  # status
+    		datetime.now().strftime("%Y-%m-%d %H:%M"),
+    		reason
         ))
 
         conn.commit()
@@ -396,7 +371,7 @@ def leave():
     conn = get_db()
     cur = conn.cursor()
     cur.execute("""
-        SELECT id, leave_dates, status, requested_on, reason, leave_type
+        SELECT id, leave_dates, status, requested_on, reason
         FROM leave_requests
         WHERE username = %s
         ORDER BY id DESC
@@ -404,13 +379,7 @@ def leave():
     history = cur.fetchall()
     conn.close()
 
-    is_comp_off_eligible = username in COMPOFF_ELIGIBLE_USERS
-
-    return render_template(
-        "leave.html",
-        history=history,
-        is_comp_off_eligible=is_comp_off_eligible
-    )
+    return render_template("leave.html", history=history)
 
 # ------------------ CANCEL LEAVE ------------------
 @app.route("/cancel-leave", methods=["POST"])
@@ -486,6 +455,47 @@ def activity():
 
     username = session["username"]
 
+    ist = pytz.timezone("Asia/Kolkata")
+    now_ist = datetime.now(ist)
+
+    today = now_ist.date()
+    now_time = now_ist.replace(second=0, microsecond=0).time()
+
+    conn = get_db()
+    cur = conn.cursor()
+
+    # ---------------- FIND LAST ALLOWED WORKING DATE ----------------
+
+    leave_dates = set()
+
+    cur.execute("""
+        SELECT leave_dates
+        FROM leave_requests
+        WHERE username = %s
+          AND status = 2
+    """, (username,))
+
+    approved = cur.fetchall()
+
+    for row in approved:
+        txt = row["leave_dates"]
+
+        if "to" in txt:
+            s, e = txt.split(" to ")
+            d1 = datetime.strptime(s, "%Y-%m-%d").date()
+            d2 = datetime.strptime(e, "%Y-%m-%d").date()
+
+            while d1 <= d2:
+                leave_dates.add(d1)
+                d1 += timedelta(days=1)
+        else:
+            leave_dates.add(datetime.strptime(txt, "%Y-%m-%d").date())
+
+    allowed_date = today - timedelta(days=1)
+
+    while allowed_date in leave_dates:
+        allowed_date -= timedelta(days=1)
+
     if request.method == "POST":
 
         activity_date = request.form.get("activity_date")
@@ -495,12 +505,6 @@ def activity():
         activity_names = request.form.getlist("activity_name[]")
         start_times = request.form.getlist("start_time[]")
         end_times = request.form.getlist("end_time[]")
-
-        ist = pytz.timezone("Asia/Kolkata")
-        now_ist = datetime.now(ist)
-
-        today = now_ist.date()
-        now_time = now_ist.replace(second=0, microsecond=0).time()
 
         selected_date = datetime.strptime(activity_date, "%Y-%m-%d").date()
         selected_str = selected_date.strftime("%Y-%m-%d")
@@ -518,9 +522,6 @@ def activity():
                 "start": start_times[i],
                 "end": end_times[i]
             })
-
-        conn = get_db()
-        cur = conn.cursor()
 
         # ---------------- BLOCK APPROVED LEAVE ----------------
         cur.execute("""
@@ -552,17 +553,30 @@ def activity():
                     "activity.html",
                     selected=username,
                     max_date=today.isoformat(),
+                    min_date=allowed_date.isoformat(),
                     form_data=form_data
                 )
 
-        # ---------------- BLOCK FUTURE DATE ----------------
+        # ---------------- BLOCK FUTURE / OLD DATE ----------------
         if selected_date > today:
-            flash("⛔ You cannot submit activity for future date")
+            flash("⛔ Future date is not allowed.")
             conn.close()
             return render_template(
                 "activity.html",
                 selected=username,
                 max_date=today.isoformat(),
+                min_date=allowed_date.isoformat(),
+                form_data=form_data
+            )
+
+        if selected_date < allowed_date:
+            flash(f"⛔ You can submit only for {allowed_date.strftime('%d-%m-%Y')} or today.")
+            conn.close()
+            return render_template(
+                "activity.html",
+                selected=username,
+                max_date=today.isoformat(),
+                min_date=allowed_date.isoformat(),
                 form_data=form_data
             )
 
@@ -605,6 +619,7 @@ def activity():
                     "activity.html",
                     selected=username,
                     max_date=today.isoformat(),
+                    min_date=allowed_date.isoformat(),
                     form_data=form_data
                 )
 
@@ -616,6 +631,7 @@ def activity():
                         "activity.html",
                         selected=username,
                         max_date=today.isoformat(),
+                        min_date=allowed_date.isoformat(),
                         form_data=form_data
                     )
 
@@ -642,6 +658,7 @@ def activity():
                         "activity.html",
                         selected=username,
                         max_date=today.isoformat(),
+                        min_date=allowed_date.isoformat(),
                         form_data=form_data
                     )
 
@@ -655,9 +672,9 @@ def activity():
             cur.execute("""
                 DELETE FROM activities
                 WHERE username = %s
-                AND activity_date = %s
-                AND start_time = %s
-                AND end_time = %s
+                  AND activity_date = %s
+                  AND start_time = %s
+                  AND end_time = %s
             """, (
                 username,
                 activity_date,
@@ -692,7 +709,8 @@ def activity():
     return render_template(
         "activity.html",
         selected=username,
-        max_date=date.today().isoformat(),
+        max_date=today.isoformat(),
+        min_date=allowed_date.isoformat(),
         form_data=None
     )
 
@@ -715,120 +733,102 @@ def manager_dashboard():
     if "manager" not in session:
         return redirect("/manager")
 
+    from datetime import datetime
+
     conn = get_db()
     cur = conn.cursor()
 
+    # ---------------- FILTERS ----------------
     selected_month = request.args.get("month", datetime.now().strftime("%m"))
     selected_year = request.args.get("year", datetime.now().strftime("%Y"))
     years = ["2024", "2025", "2026"]
 
-    # Counts
+    # ---------------- RESET REQUEST COUNT ----------------
     cur.execute("SELECT COUNT(*) AS count FROM users WHERE reset_requested = 1")
     pending_count = cur.fetchone()["count"]
 
+    # ---------------- LEAVE REQUEST COUNT ----------------
     cur.execute("SELECT COUNT(*) AS count FROM leave_requests WHERE status = 0")
     leave_pending_count = cur.fetchone()["count"]
 
-    # Activity Query
-    if selected_month == "all":
-        cur.execute("""
-            SELECT username, SUM(duration) AS productive_minutes,
-                   COUNT(DISTINCT activity_date) AS days
-            FROM activities
-            WHERE TO_CHAR(activity_date, 'YYYY') = %s
-            GROUP BY username
-        """, (selected_year,))
-    else:
-        cur.execute("""
-            SELECT username, SUM(duration) AS productive_minutes,
-                   COUNT(DISTINCT activity_date) AS days
-            FROM activities
-            WHERE TO_CHAR(activity_date, 'MM') = %s
-              AND TO_CHAR(activity_date, 'YYYY') = %s
-            GROUP BY username
-        """, (selected_month, selected_year))
+    # ---------------- PRODUCTIVITY ----------------
+    cur.execute("""
+        SELECT
+            username,
+            SUM(duration) AS productive_minutes,
+            COUNT(DISTINCT activity_date) AS days
+        FROM activities
+        WHERE TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
+        GROUP BY username
+    """, (selected_month, selected_year))
 
     activity_rows = cur.fetchall()
 
-    # Leaves
+    # ---------------- APPROVED LEAVES ----------------
     cur.execute("""
         SELECT username, leave_type, leave_dates
         FROM leave_requests
         WHERE status = 2
     """)
     leave_rows = cur.fetchall()
+
     conn.close()
 
+    # -------- CALCULATE LEAVES PER USER --------
     leave_map = {}
-    compoff_map = {}
 
     for r in leave_rows:
         user = r["username"]
         dates = r["leave_dates"]
-        leave_type = r["leave_type"]
-
-        extracted_dates = []
 
         if "to" in dates:
-            s, e = dates.split(" to ")
-            d1 = datetime.strptime(s, "%Y-%m-%d")
-            d2 = datetime.strptime(e, "%Y-%m-%d")
-
-            while d1 <= d2:
-                extracted_dates.append(d1)
-                d1 += timedelta(days=1)
+            start, end = dates.split(" to ")
+            d1 = datetime.strptime(start, "%Y-%m-%d")
+            d2 = datetime.strptime(end, "%Y-%m-%d")
+            days = (d2 - d1).days + 1
         else:
-            extracted_dates.append(datetime.strptime(dates, "%Y-%m-%d"))
+            days = 1
 
-        # ✅ FILTER BASED ON SELECTED MONTH/YEAR
-        for d in extracted_dates:
+        leave_map[user] = leave_map.get(user, 0) + days
 
-            if selected_month == "all":
-                if str(d.year) != selected_year:
-                    continue
-            else:
-                if (
-                    f"{d.month:02d}" != selected_month or
-                    str(d.year) != selected_year
-                ):
-                    continue
-
-            if leave_type == "compoff":
-                compoff_map[user] = compoff_map.get(user, 0) + 1
-            else:
-                leave_map[user] = leave_map.get(user, 0) + 1
-
+    # -------- FINAL DATA BUILD --------
     data = []
+    total_leave_percent = []
+
     total_productive_all = 0
     total_available_all = 0
-    total_leave_percent = []
 
     for r in activity_rows:
         username = r["username"]
 
-        productive_hours = round((r["productive_minutes"] or 0) / 60, 2)
+        productive_hours = (r["productive_minutes"] or 0) / 60.0
+        productive_hours = round(productive_hours, 2)
+
         working_days = r["days"] or 0
         available_hours = working_days * 7
 
-        ideal_hours = round(max(available_hours - productive_hours, 0), 2)
-        productivity = round((productive_hours / available_hours) * 100, 1) if available_hours else 0
+        ideal_hours = available_hours - productive_hours
+        if ideal_hours < 0:
+            ideal_hours = 0
+        ideal_hours = round(ideal_hours, 2)
+
+        productivity = (
+            (productive_hours / available_hours) * 100
+        ) if available_hours > 0 else 0
+        productivity = round(productivity, 1)
 
         leave_days = leave_map.get(username, 0)
-        compoff_days = compoff_map.get(username, 0)
 
-        leave_percent = round((leave_days / working_days) * 100, 1) if working_days else 0
+        leave_percent = (
+            (leave_days / working_days) * 100
+        ) if working_days > 0 else 0
+        leave_percent = round(leave_percent, 1)
 
-        # NEW METRIC
-        total_days = working_days + leave_days
-        total_hours = total_days * 7
-
-        productivity_with_leave = round(
-            (productive_hours / total_hours) * 100, 1
-        ) if total_hours else 0
+        total_leave_percent.append(leave_percent)
 
         total_productive_all += productive_hours
         total_available_all += available_hours
-        total_leave_percent.append(leave_percent)
 
         data.append({
             "name": username,
@@ -837,15 +837,14 @@ def manager_dashboard():
             "available": available_hours,
             "ideal": ideal_hours,
             "productivity": productivity,
-            "productivity_with_leave": productivity_with_leave,
             "leave_days": leave_days,
-            "leave_percent": leave_percent,
-            "compoff_days": compoff_days
+            "leave_percent": leave_percent
         })
 
-    overall_productivity = round(
-        (total_productive_all / total_available_all) * 100, 1
-    ) if total_available_all else 0
+    overall_productivity = (
+        (total_productive_all / total_available_all) * 100
+    ) if total_available_all > 0 else 0
+    overall_productivity = round(overall_productivity, 1)
 
     avg_leave_percent = round(
         sum(total_leave_percent) / (len(total_leave_percent) or 1), 1
@@ -869,31 +868,26 @@ def manager_employee_detail(username):
     if "manager" not in session:
         return redirect("/manager")
 
-    today = date.today()
+    selected_month = request.args.get("month")
+    selected_year = request.args.get("year")
 
-    selected_month = request.args.get("month", f"{today.month:02d}")
-    selected_year = request.args.get("year", str(today.year))
+    today = date.today()
+    if not selected_month:
+        selected_month = f"{today.month:02d}"
+    if not selected_year:
+        selected_year = str(today.year)
 
     conn = get_db()
     cur = conn.cursor()
 
-    if selected_month == "all":
-        cur.execute("""
-            SELECT activity_date, activity_name, start_time, end_time, submitted_at
-            FROM activities
-            WHERE username = %s
-              AND TO_CHAR(activity_date, 'YYYY') = %s
-            ORDER BY activity_date, start_time
-        """, (username, selected_year))
-    else:
-        cur.execute("""
-            SELECT activity_date, activity_name, start_time, end_time, submitted_at
-            FROM activities
-            WHERE username = %s
-              AND TO_CHAR(activity_date, 'MM') = %s
-              AND TO_CHAR(activity_date, 'YYYY') = %s
-            ORDER BY activity_date, start_time
-        """, (username, selected_month, selected_year))
+    cur.execute("""
+        SELECT activity_date, activity_name, start_time, end_time, submitted_at
+        FROM activities
+        WHERE username = %s
+          AND TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
+        ORDER BY activity_date, start_time
+    """, (username, selected_month, selected_year))
 
     rows = cur.fetchall()
     conn.close()
@@ -937,38 +931,22 @@ def export_employee_pdf(username):
     conn = get_db()
     cur = conn.cursor()
 
-    # ✅ HANDLE FULL YEAR
-    if month == "all":
-        cur.execute("""
-            SELECT activity_date, activity_name,
-                   start_time, end_time, submitted_at
-            FROM activities
-            WHERE username = %s
-              AND TO_CHAR(activity_date, 'YYYY') = %s
-            ORDER BY activity_date, start_time
-        """, (username, year))
-
-        month_name = "Full_Year"
-
-    else:
-        cur.execute("""
-            SELECT activity_date, activity_name,
-                   start_time, end_time, submitted_at
-            FROM activities
-            WHERE username = %s
-              AND TO_CHAR(activity_date, 'MM') = %s
-              AND TO_CHAR(activity_date, 'YYYY') = %s
-            ORDER BY activity_date, start_time
-        """, (username, month, year))
-
-        month_name = datetime.strptime(month, "%m").strftime("%B")
+    cur.execute("""
+        SELECT activity_date, activity_name,
+               start_time, end_time, submitted_at
+        FROM activities
+        WHERE username = %s
+          AND TO_CHAR(activity_date, 'MM') = %s
+          AND TO_CHAR(activity_date, 'YYYY') = %s
+        ORDER BY activity_date, start_time
+    """, (username, month, year))
 
     rows = cur.fetchall()
     conn.close()
 
+    month_name = datetime.strptime(month, "%m").strftime("%B")
     filename = f"{username}_{month_name}_{year}_Activities.pdf"
 
-    # ✅ USE BUFFER (same as your PostgreSQL version)
     buffer = BytesIO()
     doc = SimpleDocTemplate(
         buffer,
@@ -982,14 +960,14 @@ def export_employee_pdf(username):
     elements = []
     styles = getSampleStyleSheet()
 
-    # HEADER
-    elements.append(Paragraph("<b>Employee Activity Report</b>", styles["Heading1"]))
+    # Header
+    elements.append(Paragraph(f"<b>Employee Activity Report</b>", styles["Heading1"]))
     elements.append(Spacer(1, 0.3 * inch))
     elements.append(Paragraph(f"<b>Employee:</b> {username}", styles["Normal"]))
     elements.append(Paragraph(f"<b>Month:</b> {month_name} {year}", styles["Normal"]))
     elements.append(Spacer(1, 0.4 * inch))
 
-    # TABLE HEADER
+    # Table header
     data = [[
         "Date",
         "Activity",
@@ -998,7 +976,6 @@ def export_employee_pdf(username):
         "Submitted"
     ]]
 
-    # TABLE ROWS
     for r in rows:
 
         activity_date = r["activity_date"].strftime("%d-%b-%Y") if r["activity_date"] else "-"
@@ -1024,7 +1001,7 @@ def export_employee_pdf(username):
     table = Table(
         data,
         repeatRows=1,
-        colWidths=[80, 200, 60, 60, 100]
+        colWidths=[80, 200, 60, 60, 100]  # FIXED WIDTHS
     )
 
     table.setStyle(TableStyle([
@@ -1059,11 +1036,16 @@ def report():
 
     username = session["username"]
 
+    selected_month = request.args.get("month")
+    selected_year = request.args.get("year")
+    selected_day = request.args.get("day")
+
     today = date.today()
 
-    selected_month = request.args.get("month", f"{today.month:02d}")
-    selected_year = request.args.get("year", str(today.year))
-    selected_day = request.args.get("day")
+    if not selected_month:
+        selected_month = f"{today.month:02d}"
+    if not selected_year:
+        selected_year = str(today.year)
 
     conn = get_db()
     cur = conn.cursor()
@@ -1090,28 +1072,22 @@ def report():
 
         available_years.add(d.year)
 
-        # ✅ FILTER (FIXED FOR "all")
-        if selected_month == "all":
-            if d.year != int(selected_year):
-                continue
-        else:
-            if d.month != int(selected_month) or d.year != int(selected_year):
-                continue
+        if d.month == int(selected_month) and d.year == int(selected_year):
 
-        daily_minutes.setdefault(d, 0)
-        daily_minutes[d] += row["duration"]
+            daily_minutes.setdefault(d, 0)
+            daily_minutes[d] += row["duration"]
 
-        if d not in daily_clock:
-            daily_clock[d] = {
-                "clock_in": row["clock_in"],
-                "clock_out": row["clock_out"]
-            }
-        else:
-            if not daily_clock[d]["clock_in"] and row["clock_in"]:
-                daily_clock[d]["clock_in"] = row["clock_in"]
+            if d not in daily_clock:
+                daily_clock[d] = {
+                    "clock_in": row["clock_in"],
+                    "clock_out": row["clock_out"]
+                }
+            else:
+                if not daily_clock[d]["clock_in"] and row["clock_in"]:
+                    daily_clock[d]["clock_in"] = row["clock_in"]
 
-            if row["clock_out"]:
-                daily_clock[d]["clock_out"] = row["clock_out"]
+                if row["clock_out"]:
+                    daily_clock[d]["clock_out"] = row["clock_out"]
 
     # -------- FETCH APPROVED LEAVES --------
     cur.execute("""
@@ -1134,28 +1110,13 @@ def report():
             d2 = datetime.strptime(e, "%Y-%m-%d").date()
 
             while d1 <= d2:
-
-                if selected_month == "all":
-                    if d1.year != int(selected_year):
-                        d1 += timedelta(days=1)
-                        continue
-                else:
-                    if d1.month != int(selected_month) or d1.year != int(selected_year):
-                        d1 += timedelta(days=1)
-                        continue
-
-                leave_dates_set.add(d1)
+                if d1.month == int(selected_month) and d1.year == int(selected_year):
+                    leave_dates_set.add(d1)
                 d1 += timedelta(days=1)
-
         else:
             d = datetime.strptime(txt, "%Y-%m-%d").date()
-
-            if selected_month == "all":
-                if d.year == int(selected_year):
-                    leave_dates_set.add(d)
-            else:
-                if d.month == int(selected_month) and d.year == int(selected_year):
-                    leave_dates_set.add(d)
+            if d.month == int(selected_month) and d.year == int(selected_year):
+                leave_dates_set.add(d)
 
     # -------- BUILD REPORT TABLE --------
     report_data = []
@@ -1238,6 +1199,8 @@ def report():
         years=sorted(available_years)
     )
 
+
 # ------------------ RUN APP ------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
+

@@ -50,6 +50,7 @@
             border-radius: 8px;
             border: 1px solid #ccc;
             margin-top: 5px;
+            box-sizing: border-box;
         }
 
         .activityRow {
@@ -113,21 +114,26 @@
 
             const row = document.createElement("div");
             row.className = "activityRow";
+
             row.innerHTML = `
                 <div>
                     <label>Activity Name</label>
                     <input type="text" name="activity_name[]" value="${name}" required>
                 </div>
+
                 <div>
                     <label>Start Time</label>
                     <input type="time" name="start_time[]" value="${start}" required>
                 </div>
+
                 <div>
                     <label>End Time</label>
                     <input type="time" name="end_time[]" value="${end}" required>
                 </div>
+
                 <button type="button" class="remove-btn" onclick="removeRow(this)">✖</button>
             `;
+
             container.appendChild(row);
         }
 
@@ -135,119 +141,214 @@
             btn.parentElement.remove();
         }
     </script>
+
 </head>
 
 <body>
 
 <div class="container">
+
     <div class="card">
 
-{% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div style="
-        background:#fff3cd;
-        color:#856404;
-        padding:14px 18px;
-        border-radius:12px;
-        margin-bottom:20px;
-        font-weight:600;
-        text-align:center;
-        box-shadow:0 4px 10px rgba(0,0,0,0.08);
-    ">
-        {{ messages[0] }}
-    </div>
-  {% endif %}
-{% endwith %}
+        {% with messages = get_flashed_messages() %}
+            {% if messages %}
+                <div style="
+                    background:#fff3cd;
+                    color:#856404;
+                    padding:14px 18px;
+                    border-radius:12px;
+                    margin-bottom:20px;
+                    font-weight:600;
+                    text-align:center;
+                    box-shadow:0 4px 10px rgba(0,0,0,0.08);
+                ">
+                    {{ messages[0] }}
+                </div>
+            {% endif %}
+        {% endwith %}
 
         <h2>Daily Activity Tracker</h2>
+
         <p class="subtitle">
-            Welcome <b>{{ selected }}</b> 👋  
+            Welcome <b>{{ selected }}</b> 👋
             Fill in your activities for the day
         </p>
 
         <form method="POST">
 
             <!-- Date & Clock -->
+
             <div class="row">
+
                 <div style="flex:1">
+
                     <label>Select Date</label>
-                    <input type="date"
-                           name="activity_date"
-                           max="{{ max_date }}"
-                           value="{{ form_data.activity_date if form_data else max_date }}"
-                           required>
+
+                    <input
+                        type="date"
+                        name="activity_date"
+                        min="{{ min_date }}"
+                        max="{{ max_date }}"
+                        value="{{ form_data.activity_date if form_data else max_date }}"
+                        required>
+
                 </div>
+
                 <div style="flex:1">
+
                     <label>Clock In</label>
-                    <input type="time"
-                           name="clock_in"
-                           value="{{ form_data.clock_in if form_data else '10:00' }}"
-                           required>
+
+                    <input
+                        type="time"
+                        name="clock_in"
+                        value="{{ form_data.clock_in if form_data else '10:00' }}"
+                        required>
+
                 </div>
+
                 <div style="flex:1">
+
                     <label>Clock Out</label>
-                    <input type="time"
-                           name="clock_out"
-                           value="{{ form_data.clock_out if form_data else '18:00' }}"
-                           required>
+
+                    <input
+                        type="time"
+                        name="clock_out"
+                        value="{{ form_data.clock_out if form_data else '18:00' }}"
+                        required>
+
                 </div>
+
             </div>
 
             <hr>
 
-            <!-- Activities -->
             <h3>📝 Activities</h3>
 
             <div id="activitiesContainer">
 
                 {% if form_data and form_data.activities %}
+
                     {% for act in form_data.activities %}
+
                         <div class="activityRow">
+
                             <div>
+
                                 <label>Activity Name</label>
-                                <input type="text" name="activity_name[]" value="{{ act.name }}" required>
+
+                                <input
+                                    type="text"
+                                    name="activity_name[]"
+                                    value="{{ act.name }}"
+                                    required>
+
                             </div>
+
                             <div>
+
                                 <label>Start Time</label>
-                                <input type="time" name="start_time[]" value="{{ act.start }}" required>
+
+                                <input
+                                    type="time"
+                                    name="start_time[]"
+                                    value="{{ act.start }}"
+                                    required>
+
                             </div>
+
                             <div>
+
                                 <label>End Time</label>
-                                <input type="time" name="end_time[]" value="{{ act.end }}" required>
+
+                                <input
+                                    type="time"
+                                    name="end_time[]"
+                                    value="{{ act.end }}"
+                                    required>
+
                             </div>
-                            <button type="button" class="remove-btn" onclick="removeRow(this)">✖</button>
+
+                            <button
+                                type="button"
+                                class="remove-btn"
+                                onclick="removeRow(this)">
+                                ✖
+                            </button>
+
                         </div>
+
                     {% endfor %}
+
                 {% else %}
+
                     <div class="activityRow">
+
                         <div>
+
                             <label>Activity Name</label>
-                            <input type="text" name="activity_name[]" required>
+
+                            <input
+                                type="text"
+                                name="activity_name[]"
+                                required>
+
                         </div>
+
                         <div>
+
                             <label>Start Time</label>
-                            <input type="time" name="start_time[]" required>
+
+                            <input
+                                type="time"
+                                name="start_time[]"
+                                required>
+
                         </div>
+
                         <div>
+
                             <label>End Time</label>
-                            <input type="time" name="end_time[]" required>
+
+                            <input
+                                type="time"
+                                name="end_time[]"
+                                required>
+
                         </div>
+
                     </div>
+
                 {% endif %}
 
             </div>
 
-            <button type="button" class="add-btn" onclick="addActivityRow()">➕ Add Activity</button>
+            <button
+                type="button"
+                class="add-btn"
+                onclick="addActivityRow()">
+                ➕ Add Activity
+            </button>
 
-            <button type="submit" class="submit-btn">💾 Save Activity</button>
+            <button
+                type="submit"
+                class="submit-btn">
+                💾 Save Activity
+            </button>
 
         </form>
 
         <form action="/dashboard" style="text-align:center;">
-            <button type="submit" class="back-btn">⬅ Back to Dashboard</button>
+
+            <button
+                type="submit"
+                class="back-btn">
+                ⬅ Back to Dashboard
+            </button>
+
         </form>
 
     </div>
+
 </div>
 
 </body>
