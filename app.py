@@ -771,15 +771,19 @@ def manager_dashboard():
         FROM leave_requests
         WHERE status = 2
     """)
+
     leave_rows = cur.fetchall()
 
     conn.close()
 
-    # -------- CALCULATE LEAVES PER USER --------
+    # ---------------- LEAVE MAPS ----------------
     leave_map = {}
+    compoff_map = {}
 
     for r in leave_rows:
+
         user = r["username"]
+        leave_type = (r["leave_type"] or "").lower()
         dates = r["leave_dates"]
 
         if "to" in dates:
@@ -790,64 +794,107 @@ def manager_dashboard():
         else:
             days = 1
 
+        # Half Day counts as 0.5
+        if leave_type == "halfday":
+            days = 0.5
+
+        # Comp-Off Count
+        if leave_type == "compoff":
+            compoff_map[user] = compoff_map.get(user, 0) + days
+
+        # All leave types count towards leave
         leave_map[user] = leave_map.get(user, 0) + days
 
-    # -------- FINAL DATA BUILD --------
+    # ---------------- FINAL DATA ----------------
     data = []
-    total_leave_percent = []
 
     total_productive_all = 0
     total_available_all = 0
+    total_available_with_leave_all = 0
 
+    total_leave_percent = []
     for r in activity_rows:
+
         username = r["username"]
 
-        productive_hours = (r["productive_minutes"] or 0) / 60.0
-        productive_hours = round(productive_hours, 2)
+        productive_hours = round((r["productive_minutes"] or 0) / 60.0, 2)
 
         working_days = r["days"] or 0
+
+        leave_days = leave_map.get(username, 0)
+
+        compoff_days = compoff_map.get(username, 0)
+
+        # Working days only
         available_hours = working_days * 7
 
-        ideal_hours = available_hours - productive_hours
-        if ideal_hours < 0:
-            ideal_hours = 0
+        # Including approved leave days
+        available_hours_with_leave = (working_days + leave_days) * 7
+
+        ideal_hours = max(available_hours - productive_hours, 0)
         ideal_hours = round(ideal_hours, 2)
 
         productivity = (
             (productive_hours / available_hours) * 100
-        ) if available_hours > 0 else 0
+            if available_hours > 0 else 0
+        )
+
         productivity = round(productivity, 1)
 
-        leave_days = leave_map.get(username, 0)
+        productivity_with_leave = (
+            (productive_hours / available_hours_with_leave) * 100
+            if available_hours_with_leave > 0 else 0
+        )
+
+        productivity_with_leave = round(productivity_with_leave, 1)
 
         leave_percent = (
-            (leave_days / working_days) * 100
-        ) if working_days > 0 else 0
+            (leave_days / (working_days + leave_days)) * 100
+            if (working_days + leave_days) > 0 else 0
+        )
+
         leave_percent = round(leave_percent, 1)
 
         total_leave_percent.append(leave_percent)
 
         total_productive_all += productive_hours
         total_available_all += available_hours
+        total_available_with_leave_all += available_hours_with_leave
 
         data.append({
             "name": username,
             "productive": productive_hours,
             "days": working_days,
             "available": available_hours,
+            "available_with_leave": available_hours_with_leave,
             "ideal": ideal_hours,
             "productivity": productivity,
+            "productivity_with_leave": productivity_with_leave,
             "leave_days": leave_days,
-            "leave_percent": leave_percent
+            "leave_percent": leave_percent,
+            "compoff_days": compoff_days
         })
 
     overall_productivity = (
         (total_productive_all / total_available_all) * 100
-    ) if total_available_all > 0 else 0
+        if total_available_all > 0 else 0
+    )
+
     overall_productivity = round(overall_productivity, 1)
 
+    overall_productivity_with_leave = (
+        (total_productive_all / total_available_with_leave_all) * 100
+        if total_available_with_leave_all > 0 else 0
+    )
+
+    overall_productivity_with_leave = round(
+        overall_productivity_with_leave,
+        1
+    )
+
     avg_leave_percent = round(
-        sum(total_leave_percent) / (len(total_leave_percent) or 1), 1
+        sum(total_leave_percent) / (len(total_leave_percent) or 1),
+        1
     )
 
     return render_template(
@@ -859,7 +906,8 @@ def manager_dashboard():
         selected_year=selected_year,
         years=years,
         avg_leave_percent=avg_leave_percent,
-        overall_productivity=overall_productivity
+        overall_productivity=overall_productivity,
+        overall_productivity_with_leave=overall_productivity_with_leave
     )
 
 # ------------------ MANAGER EMPLOYEE DETAIL ------------------
@@ -1203,4 +1251,3 @@ def report():
 # ------------------ RUN APP ------------------
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000)
-

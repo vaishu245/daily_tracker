@@ -317,6 +317,7 @@ button {
 </form>
 
 <div class="kpi-grid">
+
     <div class="kpi">
         <h4>Total Employees</h4>
         <p>{{ data|length }}</p>
@@ -338,9 +339,20 @@ button {
     </div>
 
     <div class="kpi">
-        <h4>Overall Productivity %</h4>
+        <h4>Overall Productivity<br>(Working Days)</h4>
         <p>{{ overall_productivity }}%</p>
     </div>
+
+    <div class="kpi">
+        <h4>Overall Productivity<br>(Incl. Leaves)</h4>
+        <p>{{ overall_productivity_with_leave }}%</p>
+    </div>
+
+    <div class="kpi">
+        <h4>Average Leave %</h4>
+        <p>{{ avg_leave_percent }}%</p>
+    </div>
+
 </div>
 
 <h2>📈 Productivity vs Idle</h2>
@@ -353,36 +365,57 @@ button {
 
 <div class="table-wrapper">
 <table>
+
 <tr>
     <th>Name</th>
     <th>Productive Hrs</th>
     <th>Working Days</th>
-    <th>Available Hrs</th>
+    <th>Available Hrs<br>(Working)</th>
+    <th>Available Hrs<br>(Incl. Leaves)</th>
     <th>Ideal Hrs</th>
-    <th>Productivity %</th>
-    <th>Productivity (Incl Leaves)</th>
-    <th>Leaves Taken</th>
+    <th>Productivity<br>(Working)</th>
+    <th>Productivity<br>(Incl. Leaves)</th>
+    <th>Leaves</th>
     <th>Comp-Off</th>
+    <th>Leave %</th>
 </tr>
 
 {% for e in data %}
+
 <tr>
+
     <td>
         <a href="/manager/employee/{{ e.name }}?month={{ selected_month }}&year={{ selected_year }}">
             {{ e.name }}
         </a>
     </td>
+
     <td>{{ e.productive }}</td>
+
     <td>{{ e.days }}</td>
+
     <td>{{ e.available }}</td>
+
+    <td>{{ e.available_with_leave }}</td>
+
     <td>{{ e.ideal }}</td>
+
     <td>{{ e.productivity }}%</td>
+
     <td>{{ e.productivity_with_leave }}%</td>
+
     <td>{{ e.leave_days }}</td>
+
     <td>{{ e.compoff_days }}</td>
+
+    <td>{{ e.leave_percent }}%</td>
+
 </tr>
+
 {% endfor %}
+
 </table>
+
 </div>
 
 <div class="actions">
@@ -408,7 +441,7 @@ if (typeof ChartDataLabels !== "undefined") {
 
 /* ---------------- CHART ---------------- */
 
-const prodPercent = {{ overall_productivity or 0 }};
+const prodPercent = {{ overall_productivity_with_leave or 0 }};
 const idlePercent = (100 - prodPercent).toFixed(1);
 
 
