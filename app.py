@@ -733,7 +733,7 @@ def manager_dashboard():
     if "manager" not in session:
         return redirect("/manager")
 
-    from datetime import datetime
+    from datetime import datetime, timedelta
 
     conn = get_db()
     cur = conn.cursor()
@@ -767,7 +767,10 @@ def manager_dashboard():
 
     # ---------------- APPROVED LEAVES ----------------
     cur.execute("""
-        SELECT username, leave_type, leave_dates
+        SELECT
+            username,
+            leave_type,
+            leave_dates
         FROM leave_requests
         WHERE status = 2
     """)
@@ -780,30 +783,70 @@ def manager_dashboard():
     leave_map = {}
     compoff_map = {}
 
+    selected_month_int = int(selected_month)
+    selected_year_int = int(selected_year)
+
     for r in leave_rows:
 
         user = r["username"]
-        leave_type = (r["leave_type"] or "").lower()
-        dates = r["leave_dates"]
+        leave_type = (r["leave_type"] or "").strip().lower()
+        dates = (r["leave_dates"] or "").strip()
 
-        if "to" in dates:
-            start, end = dates.split(" to ")
-            d1 = datetime.strptime(start, "%Y-%m-%d")
-            d2 = datetime.strptime(end, "%Y-%m-%d")
-            days = (d2 - d1).days + 1
+        # -------- SINGLE DATE --------
+        if "to" not in dates:
+
+            try:
+                d = datetime.strptime(dates, "%Y-%m-%d")
+
+                if d.month == selected_month_int and d.year == selected_year_int:
+
+                    value = 0.5 if leave_type == "halfday" else 1
+
+                    if leave_type == "compoff":
+                        compoff_map[user] = compoff_map.get(user, 0) + value
+
+                    elif leave_type not in ["weekly off", "weeklyoff", "holiday"]:
+                        leave_map[user] = leave_map.get(user, 0) + value
+
+            except:
+                pass
+
+        # -------- DATE RANGE --------
         else:
-            days = 1
 
-        # Half Day counts as 0.5
-        if leave_type == "halfday":
-            days = 0.5
+            try:
+                start, end = dates.split(" to ")
 
-        # Comp-Off Count
-        if leave_type == "compoff":
-            compoff_map[user] = compoff_map.get(user, 0) + days
+                current = datetime.strptime(start.strip(), "%Y-%m-%d")
+                last = datetime.strptime(end.strip(), "%Y-%m-%d")
 
-        # All leave types count towards leave
-        leave_map[user] = leave_map.get(user, 0) + days
+                while current <= last:
+
+                    if (
+                        current.month == selected_month_int
+                        and current.year == selected_year_int
+                    ):
+
+                        value = 0.5 if leave_type == "halfday" else 1
+
+                        if leave_type == "compoff":
+                            compoff_map[user] = (
+                                compoff_map.get(user, 0) + value
+                            )
+
+                        elif leave_type not in [
+                            "weekly off",
+                            "weeklyoff",
+                            "holiday"
+                        ]:
+                            leave_map[user] = (
+                                leave_map.get(user, 0) + value
+                            )
+
+                    current += timedelta(days=1)
+
+            except:
+                pass
 
     # ---------------- FINAL DATA ----------------
     data = []
@@ -813,6 +856,7 @@ def manager_dashboard():
     total_available_with_leave_all = 0
 
     total_leave_percent = []
+
     for r in activity_rows:
 
         username = r["username"]
@@ -825,10 +869,8 @@ def manager_dashboard():
 
         compoff_days = compoff_map.get(username, 0)
 
-        # Working days only
         available_hours = working_days * 7
 
-        # Including approved leave days
         available_hours_with_leave = (working_days + leave_days) * 7
 
         ideal_hours = max(available_hours - productive_hours, 0)
@@ -838,21 +880,18 @@ def manager_dashboard():
             (productive_hours / available_hours) * 100
             if available_hours > 0 else 0
         )
-
         productivity = round(productivity, 1)
 
         productivity_with_leave = (
             (productive_hours / available_hours_with_leave) * 100
             if available_hours_with_leave > 0 else 0
         )
-
         productivity_with_leave = round(productivity_with_leave, 1)
 
         leave_percent = (
             (leave_days / (working_days + leave_days)) * 100
             if (working_days + leave_days) > 0 else 0
         )
-
         leave_percent = round(leave_percent, 1)
 
         total_leave_percent.append(leave_percent)
@@ -879,14 +918,12 @@ def manager_dashboard():
         (total_productive_all / total_available_all) * 100
         if total_available_all > 0 else 0
     )
-
     overall_productivity = round(overall_productivity, 1)
 
     overall_productivity_with_leave = (
         (total_productive_all / total_available_with_leave_all) * 100
         if total_available_with_leave_all > 0 else 0
     )
-
     overall_productivity_with_leave = round(
         overall_productivity_with_leave,
         1
