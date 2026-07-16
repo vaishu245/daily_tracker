@@ -311,7 +311,8 @@ def leave():
           AND activity_name='Comp-Off Earned'
     """, (username,))
 
-    is_comp_off_eligible = cur.fetchone()[0] > 0
+    result = cur.fetchone()
+    is_comp_off_eligible = result["total"] > 0
 
     if request.method == "POST":
 
