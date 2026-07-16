@@ -47,14 +47,24 @@ def init_db():
     CREATE TABLE IF NOT EXISTS leave_requests (
         id SERIAL PRIMARY KEY,
         username TEXT,
-        leave_type TEXT,          -- 'single' or 'multiple'
-        leave_dates TEXT,         -- comma-separated dates
+        leave_type TEXT,
+        leave_dates TEXT,
         reason TEXT,
-        status INTEGER DEFAULT 0, -- 0=pending, 2=approved, 3=rejected
+        status INTEGER DEFAULT 0,
         requested_on TEXT
     )
     """)
 
+    # ---------------- SAFE MIGRATION ----------------
+    cur.execute("""
+    ALTER TABLE leave_requests
+    ADD COLUMN IF NOT EXISTS from_date DATE
+    """)
+
+    cur.execute("""
+    ALTER TABLE leave_requests
+    ADD COLUMN IF NOT EXISTS to_date DATE
+    """)
 
     # ---------------- ACTIVITIES ----------------
     cur.execute("""
@@ -290,24 +300,66 @@ def leave():
 
     username = session["username"]
 
+    conn = get_db()
+    cur = conn.cursor()
+
+    # -------- Check Comp-Off Eligibility --------
+    cur.execute("""
+        SELECT COUNT(*)
+        FROM activities
+        WHERE username=%s
+          AND activity_name='Comp-Off Earned'
+    """, (username,))
+
+    is_comp_off_eligible = cur.fetchone()[0] > 0
+
     if request.method == "POST":
+
         leave_type = request.form.get("leave_type")
-        reason = request.form.get("reason")
+        reason = (request.form.get("reason") or "").strip()
+
+        # Weekly Off & Holiday don't need reason
+        if leave_type in ["weeklyoff", "holiday"]:
+            reason = ""
+
         selected_dates = []
 
-        if leave_type == "single":
+        # ---------------- Single Date Types ----------------
+        if leave_type in [
+            "single",
+            "halfday",
+            "compoff",
+            "weeklyoff",
+            "holiday"
+        ]:
+
             d = request.form.get("single_date")
+
+            if not d:
+                flash("❌ Please select a date.")
+                conn.close()
+                return redirect("/leave")
+
             selected_dates = [d]
             dates_text = d
-        else:
+
+        # ---------------- Multiple Leave ----------------
+        elif leave_type == "multiple":
+
             from_date = request.form.get("from_date")
             to_date = request.form.get("to_date")
+
+            if not from_date or not to_date:
+                flash("❌ Please select From and To dates.")
+                conn.close()
+                return redirect("/leave")
 
             d1 = datetime.strptime(from_date, "%Y-%m-%d")
             d2 = datetime.strptime(to_date, "%Y-%m-%d")
 
             if d2 < d1:
-                flash("❌ To date cannot be before From date")
+                flash("❌ To Date cannot be before From Date.")
+                conn.close()
                 return redirect("/leave")
 
             while d1 <= d2:
@@ -316,70 +368,101 @@ def leave():
 
             dates_text = f"{from_date} to {to_date}"
 
-        conn = get_db()
-        cur = conn.cursor()
+        else:
+            flash("❌ Invalid Leave Type.")
+            conn.close()
+            return redirect("/leave")
 
-        # Ignore rejected (3) and cancelled (4)
+        # ---------------- Duplicate Validation ----------------
         cur.execute("""
             SELECT leave_dates
             FROM leave_requests
-            WHERE username = %s
+            WHERE username=%s
               AND status IN (0,2)
         """, (username,))
 
         existing = cur.fetchall()
 
-        for r in existing:
-            txt = r["leave_dates"]
+        for row in existing:
+
             booked = []
+            txt = row["leave_dates"]
 
             if "to" in txt:
+
                 s, e = txt.split(" to ")
+
                 d1 = datetime.strptime(s, "%Y-%m-%d")
                 d2 = datetime.strptime(e, "%Y-%m-%d")
+
                 while d1 <= d2:
                     booked.append(d1.strftime("%Y-%m-%d"))
                     d1 += timedelta(days=1)
+
             else:
                 booked.append(txt)
 
             if set(booked) & set(selected_dates):
-                flash("🚫 You already applied leave for these date(s).")
+                flash("🚫 Leave already exists for selected date(s).")
                 conn.close()
                 return redirect("/leave")
 
+        # ---------------- Auto Approval ----------------
+        if leave_type in ["weeklyoff", "holiday"]:
+            status = 2
+        else:
+            status = 0
+
         cur.execute("""
             INSERT INTO leave_requests
-            (username, leave_type, leave_dates, status, requested_on, reason)
-            VALUES (%s, %s, %s, %s, %s, %s)
+            (
+                username,
+                leave_type,
+                leave_dates,
+                status,
+                requested_on,
+                reason
+            )
+            VALUES
+            (
+                %s,%s,%s,%s,%s,%s
+            )
         """, (
             username,
-    		leave_type,
+            leave_type,
             dates_text,
-    		0,  # status
-    		datetime.now().strftime("%Y-%m-%d %H:%M"),
-    		reason
+            status,
+            datetime.now().strftime("%Y-%m-%d %H:%M"),
+            reason
         ))
 
         conn.commit()
-        conn.close()
 
-        flash("✅ Leave request sent successfully")
-        return redirect("/leave")
+        flash("✅ Leave submitted successfully.")
 
-    # ---- history ----
-    conn = get_db()
-    cur = conn.cursor()
+    # ---------------- History ----------------
     cur.execute("""
-        SELECT id, leave_dates, status, requested_on, reason
+        SELECT
+            id,
+            leave_type,
+            leave_dates,
+            reason,
+            requested_on,
+            status
         FROM leave_requests
-        WHERE username = %s
+        WHERE username=%s
         ORDER BY id DESC
     """, (username,))
+
     history = cur.fetchall()
+
     conn.close()
 
-    return render_template("leave.html", history=history)
+    return render_template(
+        "leave.html",
+        history=history,
+        is_comp_off_eligible=is_comp_off_eligible
+    )
 
 # ------------------ CANCEL LEAVE ------------------
 @app.route("/cancel-leave", methods=["POST"])
@@ -393,20 +476,38 @@ def cancel_leave():
     conn = get_db()
     cur = conn.cursor()
 
-    # Allow cancel if Pending OR Approved
+    cur.execute("""
+        SELECT leave_type, status
+        FROM leave_requests
+        WHERE id=%s
+          AND username=%s
+    """, (leave_id, username))
+
+    leave = cur.fetchone()
+
+    if not leave:
+        conn.close()
+        flash("❌ Leave request not found.")
+        return redirect("/leave")
+
+    if leave["status"] not in (0, 2):
+        conn.close()
+        flash("❌ Only Pending or Approved leave can be cancelled.")
+        return redirect("/leave")
+
     cur.execute("""
         UPDATE leave_requests
         SET status = 4
-        WHERE id = %s
-          AND username = %s
-          AND status IN (0,2)
+        WHERE id=%s
+          AND username=%s
     """, (leave_id, username))
 
     conn.commit()
     conn.close()
 
-    flash("🗑 Leave cancelled successfully")
+    flash("🗑 Leave cancelled successfully.")
     return redirect("/leave")
+
 
 # ------------------ MANAGER LEAVE REQUEST ------------------
 @app.route("/manager/leave-requests")
@@ -416,13 +517,22 @@ def manager_leave_requests():
 
     conn = get_db()
     cur = conn.cursor()
+
     cur.execute("""
-        SELECT * FROM leave_requests WHERE status = 0
+        SELECT *
+        FROM leave_requests
+        WHERE status = 0
+        ORDER BY requested_on ASC
     """)
+
     requests = cur.fetchall()
+
     conn.close()
 
-    return render_template("manager_leave_requests.html", requests=requests)
+    return render_template(
+        "manager_leave_requests.html",
+        requests=requests
+    )
 
 # ------------------ MANAGER APPROVE / REJECT ------------------
 @app.route("/manager/handle-leave", methods=["POST"])
@@ -433,15 +543,41 @@ def handle_leave():
     leave_id = request.form["id"]
     action = request.form["action"]
 
-    status = 2 if action == "approve" else 3
-
     conn = get_db()
     cur = conn.cursor()
+
+    cur.execute("""
+        SELECT leave_type
+        FROM leave_requests
+        WHERE id = %s
+    """, (leave_id,))
+
+    leave = cur.fetchone()
+
+    if not leave:
+        conn.close()
+        return redirect("/manager/leave-requests")
+
+    leave_type = (leave["leave_type"] or "").lower()
+
+    if action == "approve":
+
+        # Weekly Off & Holiday are auto-approved.
+        # If manager somehow receives them, approve directly.
+        if leave_type in ["weeklyoff", "holiday"]:
+            status = 2
+        else:
+            status = 2
+
+    else:
+        status = 3
+
     cur.execute("""
         UPDATE leave_requests
         SET status = %s
         WHERE id = %s
     """, (status, leave_id))
+
     conn.commit()
     conn.close()
 

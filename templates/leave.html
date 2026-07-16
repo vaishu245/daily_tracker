@@ -4,385 +4,452 @@
     <title>Apply Leave</title>
 
     <style>
-        body {
-            margin: 0;
-            min-height: 100vh;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            display: flex;
-            justify-content: center;
-            align-items: center;
+        body{
+            margin:0;
+            min-height:100vh;
+            font-family:"Segoe UI",Arial,sans-serif;
+            background:linear-gradient(135deg,#667eea,#764ba2);
+            display:flex;
+            justify-content:center;
+            align-items:center;
         }
 
-        .container {
-            width: 900px;
-            background: white;
-            padding: 30px 35px;
-            border-radius: 20px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        .container{
+            width:900px;
+            background:#fff;
+            padding:30px 35px;
+            border-radius:20px;
+            box-shadow:0 20px 40px rgba(0,0,0,.25);
         }
 
-        h2 {
-            text-align: center;
-            margin-top: 0;
-            color: #333;
+        h2{
+            text-align:center;
+            margin-top:0;
+            color:#333;
         }
 
-        label {
-            font-weight: 600;
-            margin-top: 14px;
-            display: block;
-            color: #444;
+        label{
+            display:block;
+            margin-top:14px;
+            font-weight:600;
+            color:#444;
         }
 
-        select, input, textarea {
-            width: 100%;
-            padding: 12px;
-            margin-top: 6px;
-            border-radius: 10px;
-            border: 1px solid #ccc;
-            font-family: inherit;
-            box-sizing: border-box;
+        select,
+        input,
+        textarea{
+            width:100%;
+            padding:12px;
+            margin-top:6px;
+            border-radius:10px;
+            border:1px solid #ccc;
+            box-sizing:border-box;
+            font-family:inherit;
         }
 
-        textarea {
-            resize: vertical;
-            min-height: 90px;
+        textarea{
+            resize:vertical;
+            min-height:90px;
         }
 
-        button {
-            margin-top: 20px;
-            padding: 12px;
-            width: 100%;
-            border-radius: 25px;
-            border: none;
-            background: #4b49ac;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            font-weight: 600;
+        button{
+            width:100%;
+            margin-top:20px;
+            padding:12px;
+            border:none;
+            border-radius:25px;
+            background:#4b49ac;
+            color:#fff;
+            font-size:16px;
+            font-weight:600;
+            cursor:pointer;
         }
 
-        button:hover {
-            background: #3f3db3;
+        button:hover{
+            background:#3f3db3;
         }
 
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 35px;
+        table{
+            width:100%;
+            border-collapse:collapse;
+            margin-top:35px;
         }
 
-        th {
-            background: #4b49ac;
-            color: white;
-            padding: 12px;
+        th{
+            background:#4b49ac;
+            color:#fff;
+            padding:12px;
         }
 
-        th, td {
-            padding: 14px;
-            text-align: center;
+        td{
+            padding:14px;
+            text-align:center;
+            border-bottom:1px solid #eee;
         }
 
-        tr {
-            border-bottom: 1px solid #eee;
+        tr:hover{
+            background:#f4f4ff;
         }
 
-        tr:hover {
-            background: #f4f4ff;
+        .badge{
+            padding:6px 14px;
+            border-radius:20px;
+            color:#fff;
+            font-size:13px;
+            font-weight:600;
         }
 
-        .badge {
-            padding: 6px 14px;
-            border-radius: 20px;
-            color: white;
-            font-weight: 600;
-            font-size: 13px;
+        .pending{background:#ff9800;}
+        .approved{background:#4caf50;}
+        .rejected{background:#f44336;}
+        .cancelled{background:#9e9e9e;}
+
+        .badge-type{
+            display:inline-block;
+            margin-top:6px;
+            padding:4px 10px;
+            border-radius:12px;
+            color:#fff;
+            font-size:12px;
+            font-weight:600;
         }
 
-        .pending { background: #ff9800; }
-        .approved { background: #4caf50; }
-        .rejected { background: #f44336; }
-        .cancelled { background: #9e9e9e; }
+        .badge-halfday{background:#009688;}
+        .badge-compoff{background:#4caf50;}
+        .badge-weeklyoff{background:#2196f3;}
+        .badge-holiday{background:#9c27b0;}
 
-        .badge-type {
-            display: inline-block;
-            margin-top: 5px;
-            padding: 3px 10px;
-            border-radius: 12px;
-            color: white;
-            font-size: 12px;
-            font-weight: 600;
+        .cancel-btn{
+            padding:6px 12px;
+            border:none;
+            border-radius:20px;
+            background:#e53935;
+            color:#fff;
+            cursor:pointer;
+            font-size:13px;
         }
 
-        .badge-compoff {
-            background: #4caf50;
+        .cancel-btn:hover{
+            background:#c62828;
         }
 
-        .badge-weeklyoff {
-            background: #2196f3;
+        .empty{
+            margin-top:30px;
+            padding:30px;
+            text-align:center;
+            background:#f1fff3;
+            color:#4caf50;
+            font-weight:600;
+            border-radius:12px;
         }
 
-        .badge-holiday {
-            background: #9c27b0;
+        .footer{
+            margin-top:30px;
+            text-align:center;
         }
 
-        .cancel-btn {
-            padding: 6px 12px;
-            border-radius: 20px;
-            border: none;
-            background: #e53935;
-            color: white;
-            cursor: pointer;
-            font-size: 13px;
+        .back-link{
+            display:inline-block;
+            text-decoration:none;
+            padding:10px 24px;
+            border-radius:25px;
+            background:#999;
+            color:#fff;
+            font-weight:600;
         }
 
-        .cancel-btn:hover {
-            background: #c62828;
-        }
-
-        .empty {
-            text-align: center;
-            padding: 30px;
-            margin-top: 30px;
-            background: #f1fff3;
-            color: #4caf50;
-            font-weight: 600;
-            border-radius: 12px;
-        }
-
-        .footer {
-            margin-top: 30px;
-            text-align: center;
-        }
-
-        .back-link {
-            text-decoration: none;
-            background: #999;
-            color: white;
-            padding: 10px 24px;
-            border-radius: 25px;
-            font-weight: 600;
-            transition: 0.3s;
-            display: inline-block;
-        }
-
-        .back-link:hover {
-            background: #777;
+        .back-link:hover{
+            background:#777;
         }
     </style>
 
-    <script>
-        function toggleDates(val) {
+<script>
 
-            const showSingle =
-                val === "single" ||
-                val === "compoff" ||
-                val === "weeklyoff" ||
-                val === "holiday";
+function toggleDates(type){
 
-            document.getElementById("single").style.display =
-                showSingle ? "block" : "none";
+    const singleTypes=[
+        "single",
+        "halfday",
+        "compoff",
+        "weeklyoff",
+        "holiday"
+    ];
 
-            document.getElementById("range").style.display =
-                val === "multiple" ? "block" : "none";
-        }
-    </script>
+    document.getElementById("single").style.display=
+        singleTypes.includes(type) ? "block":"none";
+
+    document.getElementById("range").style.display=
+        type==="multiple" ? "block":"none";
+
+    const reasonDiv=document.getElementById("reasonDiv");
+
+    if(type==="weeklyoff" || type==="holiday"){
+        reasonDiv.style.display="none";
+        document.getElementById("reason").required=false;
+    }
+    else{
+        reasonDiv.style.display="block";
+        document.getElementById("reason").required=true;
+    }
+
+}
+
+</script>
+
 </head>
 
 <body>
 
 <div class="container">
 
-    <h2>🏖 Apply Leave</h2>
+<h2>🏖 Apply Leave</h2>
 
 {% with messages = get_flashed_messages() %}
-  {% if messages %}
-    <div style="
-        background:#fff3cd;
-        color:#856404;
-        padding:12px 16px;
-        border-radius:12px;
-        margin-bottom:20px;
-        font-weight:600;
-        text-align:center;
-    ">
-        {{ messages[0] }}
-    </div>
-  {% endif %}
+{% if messages %}
+
+<div style="
+background:#fff3cd;
+color:#856404;
+padding:12px;
+border-radius:12px;
+margin-bottom:20px;
+font-weight:600;
+text-align:center;">
+
+{{ messages[0] }}
+
+</div>
+
+{% endif %}
 {% endwith %}
 
-    <form method="POST">
+<form method="POST">
 
-        <label>Leave Type</label>
+<label>Leave Type</label>
 
-        <select name="leave_type" onchange="toggleDates(this.value)" required>
+<select
+name="leave_type"
+required
+onchange="toggleDates(this.value)">
 
-            <option value="">Select Leave Type</option>
+<option value="">Select Leave Type</option>
 
-            <option value="single">One Day</option>
+<option value="single">One Day Leave</option>
 
-            <option value="multiple">More Than One Day</option>
+<option value="multiple">Multiple Day Leave</option>
 
-            {% if is_comp_off_eligible %}
-                <option value="compoff">Comp-Off Leave</option>
-            {% endif %}
+<option value="halfday">Half Day</option>
 
-            <option value="weeklyoff">Weekly Off</option>
+{% if is_comp_off_eligible %}
+<option value="compoff">Comp-Off</option>
+{% endif %}
 
-            <option value="holiday">Holiday</option>
+<option value="weeklyoff">Weekly Off</option>
 
-        </select>
+<option value="holiday">Holiday</option>
 
-        <div id="single" style="display:none;">
+</select>
 
-            <label>Select Date</label>
+<div id="single" style="display:none;">
 
-            <input type="date" name="single_date">
+<label>Select Date</label>
 
-        </div>
+<input
+type="date"
+name="single_date">
 
-        <div id="range" style="display:none;">
+</div>
 
-            <label>From Date</label>
+<div id="range" style="display:none;">
 
-            <input type="date" name="from_date">
+<label>From Date</label>
 
-            <label>To Date</label>
+<input
+type="date"
+name="from_date">
 
-            <input type="date" name="to_date">
+<label>To Date</label>
 
-        </div>
+<input
+type="date"
+name="to_date">
 
-        <label>Reason</label>
+</div>
 
-        <textarea
-            name="reason"
-            placeholder="Enter reason..."
-            required></textarea>
+<div id="reasonDiv">
 
-        <button type="submit">
-            Submit
-        </button>
+<label>Reason</label>
 
-    </form>
+<textarea
+id="reason"
+name="reason"
+placeholder="Enter reason..."
+required></textarea>
 
-    <h2 style="margin-top:20px;">📋 Your Leave Requests</h2>
+</div>
 
-    {% if history %}
+<button type="submit">
 
-    <table>
+Submit
 
-        <tr>
-            <th>Leave Dates</th>
-            <th>Reason</th>
-            <th>Requested On</th>
-            <th>Status</th>
-            <th>Action</th>
-        </tr>
+</button>
 
-        {% for h in history %}
+</form>
 
-        <tr>
+<h2 style="margin-top:20px;">
 
-            <td>
+📋 Your Leave Requests
 
-                {{ h["leave_dates"] }}
+</h2>
 
-                {% if h["leave_type"] == "compoff" %}
-                    <br>
-                    <span class="badge-type badge-compoff">
-                        Comp-Off
-                    </span>
+{% if history %}
 
-                {% elif h["leave_type"] == "weeklyoff" %}
-                    <br>
-                    <span class="badge-type badge-weeklyoff">
-                        Weekly Off
-                    </span>
+<table>
 
-                {% elif h["leave_type"] == "holiday" %}
-                    <br>
-                    <span class="badge-type badge-holiday">
-                        Holiday
-                    </span>
-                {% endif %}
+<tr>
 
-            </td>
+<th>Leave Dates</th>
 
-            <td>{{ h["reason"] }}</td>
+<th>Reason</th>
 
-            <td>{{ h["requested_on"] }}</td>
+<th>Requested On</th>
 
-            <td>
+<th>Status</th>
 
-                {% if h["status"] == 0 %}
-                    <span class="badge pending">⏳ Pending</span>
+<th>Action</th>
 
-                {% elif h["status"] == 2 %}
-                    <span class="badge approved">✅ Approved</span>
+</tr>
 
-                {% elif h["status"] == 3 %}
-                    <span class="badge rejected">❌ Rejected</span>
+{% for h in history %}
 
-                {% elif h["status"] == 4 %}
-                    <span class="badge cancelled">🗑 Cancelled</span>
+<tr>
 
-                {% endif %}
+<td>
 
-            </td>
+{{ h["leave_dates"] }}
 
-            <td>
+{% if h["leave_type"]=="halfday" %}
 
-                {% if h["status"] in [0,2] %}
+<br>
+<span class="badge-type badge-halfday">
+Half Day
+</span>
 
-                <form method="POST" action="/cancel-leave" style="margin:0;">
+{% elif h["leave_type"]=="compoff" %}
 
-                    <input
-                        type="hidden"
-                        name="id"
-                        value="{{ h['id'] }}">
+<br>
+<span class="badge-type badge-compoff">
+Comp-Off
+</span>
 
-                    <button
-                        type="submit"
-                        class="cancel-btn"
-                        onclick="return confirm('Are you sure you want to cancel this leave?');">
+{% elif h["leave_type"]=="weeklyoff" %}
 
-                        Cancel
+<br>
+<span class="badge-type badge-weeklyoff">
+Weekly Off
+</span>
 
-                    </button>
+{% elif h["leave_type"]=="holiday" %}
 
-                </form>
+<br>
+<span class="badge-type badge-holiday">
+Holiday
+</span>
 
-                {% else %}
+{% endif %}
 
-                    -
+</td>
 
-                {% endif %}
+<td>
 
-            </td>
+{{ h["reason"] or "-" }}
 
-        </tr>
+</td>
 
-        {% endfor %}
+<td>
 
-    </table>
+{{ h["requested_on"] }}
 
-    {% else %}
+</td>
 
-        <div class="empty">
-            No leave requests yet
-        </div>
+<td>
 
-    {% endif %}
+{% if h["status"]==0 %}
+<span class="badge pending">⏳ Pending</span>
 
-    <div class="footer">
+{% elif h["status"]==2 %}
+<span class="badge approved">✅ Approved</span>
 
-        <a href="/dashboard" class="back-link">
-            ⬅ Back to Dashboard
-        </a>
+{% elif h["status"]==3 %}
+<span class="badge rejected">❌ Rejected</span>
 
-    </div>
+{% elif h["status"]==4 %}
+<span class="badge cancelled">🗑 Cancelled</span>
+
+{% endif %}
+
+</td>
+
+<td>
+
+{% if h["status"] in [0,2] %}
+
+<form
+method="POST"
+action="/cancel-leave"
+style="margin:0;">
+
+<input
+type="hidden"
+name="id"
+value="{{ h['id'] }}">
+
+<button
+type="submit"
+class="cancel-btn"
+onclick="return confirm('Are you sure you want to cancel this leave?');">
+
+Cancel
+
+</button>
+
+</form>
+
+{% else %}
+
+-
+
+{% endif %}
+
+</td>
+
+</tr>
+
+{% endfor %}
+
+</table>
+
+{% else %}
+
+<div class="empty">
+
+No leave requests yet
+
+</div>
+
+{% endif %}
+
+<div class="footer">
+
+<a
+href="/dashboard"
+class="back-link">
+
+⬅ Back to Dashboard
+
+</a>
+
+</div>
 
 </div>
 
