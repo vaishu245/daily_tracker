@@ -305,10 +305,10 @@ def leave():
 
     # -------- Check Comp-Off Eligibility --------
     cur.execute("""
-        SELECT COUNT(*)
+        SELECT COUNT(*) AS total
         FROM activities
-        WHERE username=%s
-          AND activity_name='Comp-Off Earned'
+        WHERE username = %s
+          AND activity_name = 'Comp-Off Earned'
     """, (username,))
 
     result = cur.fetchone()
