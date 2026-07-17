@@ -992,7 +992,6 @@ def manager_dashboard():
     total_available_all = 0
     total_available_with_leave_all = 0
 
-    total_leave_percent = []
 
     for r in activity_rows:
 
@@ -1005,6 +1004,11 @@ def manager_dashboard():
         leave_days = leave_map.get(username, 0)
 
         compoff_days = compoff_map.get(username, 0)
+
+        half_days = 0
+
+        if leave_days % 1 != 0:
+            half_days = 1
 
         available_hours = working_days * 7
 
@@ -1025,13 +1029,7 @@ def manager_dashboard():
         )
         productivity_with_leave = round(productivity_with_leave, 1)
 
-        leave_percent = (
-            (leave_days / (working_days + leave_days)) * 100
-            if (working_days + leave_days) > 0 else 0
-        )
-        leave_percent = round(leave_percent, 1)
 
-        total_leave_percent.append(leave_percent)
 
         total_productive_all += productive_hours
         total_available_all += available_hours
@@ -1047,8 +1045,8 @@ def manager_dashboard():
             "productivity": productivity,
             "productivity_with_leave": productivity_with_leave,
             "leave_days": leave_days,
-            "leave_percent": leave_percent,
-            "compoff_days": compoff_days
+            "compoff_days": compoff_days,
+            "half_days": half_days
         })
 
     overall_productivity = (
@@ -1066,11 +1064,6 @@ def manager_dashboard():
         1
     )
 
-    avg_leave_percent = round(
-        sum(total_leave_percent) / (len(total_leave_percent) or 1),
-        1
-    )
-
     return render_template(
         "manager_dashboard.html",
         data=data,
@@ -1079,7 +1072,6 @@ def manager_dashboard():
         selected_month=selected_month,
         selected_year=selected_year,
         years=years,
-        avg_leave_percent=avg_leave_percent,
         overall_productivity=overall_productivity,
         overall_productivity_with_leave=overall_productivity_with_leave
     )
