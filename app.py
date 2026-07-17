@@ -1313,51 +1313,70 @@ def report():
 
     # -------- FETCH APPROVED LEAVES --------
     cur.execute("""
-        SELECT leave_dates
+        SELECT leave_dates, leave_type
         FROM leave_requests
         WHERE username = %s
           AND status = 2
     """, (username,))
     leave_rows = cur.fetchall()
 
-    leave_dates_set = set()
+    leave_dates_dict = {}
 
     for r in leave_rows:
 
         txt = r["leave_dates"]
+        leave_type = r["leave_type"]
+
+        if leave_type == "weeklyoff":
+            display_text = "Weekly Off"
+        elif leave_type == "holiday":
+            display_text = "Holiday"
+        elif leave_type == "compoff":
+            display_text = "Comp-Off"
+        elif leave_type == "halfday":
+            display_text = "Half Day"
+        else:
+            display_text = "Leave"
 
         if "to" in txt:
+
             s, e = txt.split(" to ")
             d1 = datetime.strptime(s, "%Y-%m-%d").date()
             d2 = datetime.strptime(e, "%Y-%m-%d").date()
 
             while d1 <= d2:
                 if d1.month == int(selected_month) and d1.year == int(selected_year):
-                    leave_dates_set.add(d1)
+                    leave_dates_dict[d1] = display_text
                 d1 += timedelta(days=1)
+
         else:
+
             d = datetime.strptime(txt, "%Y-%m-%d").date()
+
             if d.month == int(selected_month) and d.year == int(selected_year):
-                leave_dates_set.add(d)
+                leave_dates_dict[d] = display_text
 
     # -------- BUILD REPORT TABLE --------
     report_data = []
     total_minutes = 0
-    leave_count = len(leave_dates_set)
+    leave_count = len(leave_dates_dict)
 
-    all_dates = set(daily_minutes.keys()) | leave_dates_set
+    all_dates = set(daily_minutes.keys()) | set(leave_dates_dict.keys())
 
     for d in sorted(all_dates):
 
-        if d in leave_dates_set:
+        if d in leave_dates_dict:
+
             report_data.append({
                 "date": d,
-                "time": "Leave",
+                "time": leave_dates_dict[d],
                 "productivity": "-",
                 "clock_in": "-",
                 "clock_out": "-"
             })
+
         else:
+
             mins = daily_minutes.get(d, 0)
             hrs = mins // 60
             rem = mins % 60
