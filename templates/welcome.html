@@ -1,114 +1,296 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <title>Daily Activity Tracker</title>
-    
-    <meta name="google-site-verification" content="abc123xyz" />
+
+    <meta name="google-site-verification" content="abc123xyz"/>
 
     <style>
-        body {
-            margin: 0;
-            font-family: "Segoe UI", Arial, sans-serif;
-            background: linear-gradient(135deg, #667eea, #764ba2);
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            color: white;
-            position: relative;
+
+        *{
+            margin:0;
+            padding:0;
+            box-sizing:border-box;
+            font-family:"Segoe UI",sans-serif;
         }
 
-        .card {
-            background: white;
-            color: #333;
-            padding: 45px 40px;
-            border-radius: 24px;
-            width: 420px;
-            text-align: center;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.25);
+        body{
+
+            background:#eef5ff;
+
+            min-height:100vh;
+
+            display:flex;
+
+            justify-content:center;
+
+            align-items:center;
+
+            padding:30px;
+
         }
 
-        h1 {
-            margin: 0;
-            font-size: 28px;
+        .card{
+
+            width:520px;
+
+            background:white;
+
+            border-radius:25px;
+
+            padding:45px;
+
+            box-shadow:0 15px 35px rgba(0,0,0,.10);
+
+            text-align:center;
+
         }
 
-        .subtitle {
-            margin-top: 8px;
-            color: #666;
-            font-size: 15px;
+        .logo{
+
+            width:90px;
+
+            height:90px;
+
+            border-radius:50%;
+
+            background:linear-gradient(135deg,#5b7cff,#7b4dff);
+
+            margin:auto;
+
+            display:flex;
+
+            align-items:center;
+
+            justify-content:center;
+
+            font-size:42px;
+
+            color:white;
+
+            margin-bottom:25px;
+
+            box-shadow:0 12px 30px rgba(91,124,255,.35);
+
         }
 
-        .date {
-            margin-top: 14px;
-            font-size: 14px;
-            color: #888;
-            font-weight: 600;
+        h1{
+
+            font-size:34px;
+
+            color:#23395d;
+
+            margin-bottom:8px;
+
         }
 
-        .actions {
-            margin-top: 35px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            align-items: center;
+        .subtitle{
+
+            color:#6b7280;
+
+            font-size:16px;
+
+            margin-bottom:8px;
+
         }
 
-        .role-btn {
-            width: 100%;
-            padding: 16px;
-            font-size: 16px;
-            border-radius: 32px;
-            border: 2px solid #4b49ac;
-            cursor: pointer;
-            font-weight: 600;
-            background: white;
-            color: #4b49ac;
-            transition: all 0.3s ease;
+        .date{
+
+            color:#8b8b8b;
+
+            font-size:14px;
+
+            font-weight:600;
+
+            margin-bottom:40px;
+
         }
 
-        .role-btn:hover {
-            background: linear-gradient(135deg, #4b49ac, #6f6be3);
-            color: white;
-            transform: translateY(-3px);
-            box-shadow: 0 12px 25px rgba(75,73,172,0.5);
+        .section-title{
+
+            text-align:left;
+
+            font-size:15px;
+
+            color:#4a4a4a;
+
+            margin-bottom:18px;
+
+            font-weight:600;
+
         }
 
-        form {
-            width: 100%;
-            margin: 0;
+        form{
+
+            margin-bottom:18px;
+
         }
+
+        button{
+
+            width:100%;
+
+            padding:18px;
+
+            border:none;
+
+            border-radius:15px;
+
+            cursor:pointer;
+
+            font-size:17px;
+
+            font-weight:600;
+
+            transition:.30s;
+
+        }
+
+        .employee{
+
+            background:#4f7cff;
+
+            color:white;
+
+        }
+
+        .manager{
+
+            background:white;
+
+            border:2px solid #4f7cff;
+
+            color:#4f7cff;
+
+        }
+
+        .employee:hover{
+
+            transform:translateY(-3px);
+
+            box-shadow:0 12px 25px rgba(79,124,255,.35);
+
+        }
+
+        .manager:hover{
+
+            background:#4f7cff;
+
+            color:white;
+
+            transform:translateY(-3px);
+
+        }
+
+        .footer{
+
+            margin-top:35px;
+
+            color:#9aa0a6;
+
+            font-size:13px;
+
+        }
+
+        @media(max-width:600px){
+
+            .card{
+
+                padding:30px;
+
+            }
+
+            h1{
+
+                font-size:28px;
+
+            }
+
+        }
+
     </style>
+
 </head>
 
 <body>
 
 <div class="card">
+
+    <div class="logo">
+        📊
+    </div>
+
     <h1>Daily Activity Tracker</h1>
 
     <div class="subtitle">
-        Track work. Measure productivity. Improve daily.
+
+        Monitor work, improve productivity and simplify reporting.
+
     </div>
 
     <div class="date" id="todayDate"></div>
 
-    <div class="actions">
-        <form action="/employee">
-            <button class="role-btn">👨‍💼 Continue as Employee</button>
-        </form>
+    <div class="section-title">
 
-        <form action="/manager">
-            <button class="role-btn">👩‍💼 Continue as Manager</button>
-        </form>
+        Select your role
+
     </div>
+
+    <form action="/employee">
+
+        <button class="employee">
+
+            👨‍💼 Continue as Employee
+
+        </button>
+
+    </form>
+
+    <form action="/manager">
+
+        <button class="manager">
+
+            👩‍💼 Continue as Manager
+
+        </button>
+
+    </form>
+
+    <div class="footer">
+
+        Daily Activity Tracker • Productivity Monitoring System
+
+    </div>
+
 </div>
 
 <script>
-    const today = new Date();
-    const options = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
-    document.getElementById("todayDate").innerText =
-        today.toLocaleDateString('en-IN', options);
+
+const today=new Date();
+
+const options={
+
+weekday:'long',
+
+day:'numeric',
+
+month:'long',
+
+year:'numeric'
+
+};
+
+document.getElementById("todayDate").innerHTML=
+
+today.toLocaleDateString("en-IN",options);
+
 </script>
 
 </body>
+
 </html>

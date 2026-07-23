@@ -1,135 +1,458 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Employee Login</title>
-    <style>
-        body {
-            background: #f4f6f9;
-            font-family: "Segoe UI", Arial;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            width: 400px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        h2 {
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 30px;
-            border: none;
-            background: #4b49ac;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .back-btn {
-            background: #ddd;
-            color: #333;
-        }
-        .error {
-            color: red;
-            text-align: center;
-            margin-top: 10px;
-        }
-        .pending {
-            text-align: center;
-            color: #ff9800;
-            font-weight: 600;
-            margin-top: 20px;
-        }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Employee Login</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+
+    background:#eef5ff;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:30px;
+
+}
+
+.card{
+
+    width:470px;
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:40px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.10);
+
+}
+
+.logo{
+
+    width:90px;
+    height:90px;
+
+    margin:auto;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#5b7cff,#7b4dff);
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:40px;
+
+    color:white;
+
+    margin-bottom:22px;
+
+    box-shadow:0 12px 25px rgba(91,124,255,.35);
+
+}
+
+h2{
+
+    text-align:center;
+
+    color:#23395d;
+
+    margin-bottom:8px;
+
+}
+
+.subtitle{
+
+    text-align:center;
+
+    color:#777;
+
+    margin-bottom:35px;
+
+    font-size:15px;
+
+}
+
+label{
+
+    display:block;
+
+    font-weight:600;
+
+    color:#444;
+
+    margin-bottom:8px;
+
+}
+
+select,
+input{
+
+    width:100%;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    border:1px solid #d7dbe6;
+
+    outline:none;
+
+    font-size:15px;
+
+    transition:.3s;
+
+    margin-bottom:20px;
+
+}
+
+select:focus,
+input:focus{
+
+    border-color:#5b7cff;
+
+    box-shadow:0 0 0 4px rgba(91,124,255,.15);
+
+}
+
+.primary-btn{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#4f7cff;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.30s;
+
+}
+
+.primary-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 25px rgba(79,124,255,.35);
+
+}
+
+.reset-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    margin-top:12px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#ff6b6b;
+
+    color:white;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.reset-btn:hover{
+
+    background:#ef5350;
+
+}
+
+.back-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    margin-top:15px;
+
+    border:2px solid #4f7cff;
+
+    border-radius:14px;
+
+    background:white;
+
+    color:#4f7cff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.30s;
+
+}
+
+.back-btn:hover{
+
+    background:#4f7cff;
+
+    color:white;
+
+}
+
+.pending{
+
+    background:#fff7e6;
+
+    color:#d48806;
+
+    border-left:5px solid #faad14;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    margin-bottom:20px;
+
+    font-weight:600;
+
+    text-align:center;
+
+}
+
+.error{
+
+    margin-top:20px;
+
+    background:#ffe5e5;
+
+    color:#d8000c;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    text-align:center;
+
+}
+
+.footer{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    color:#999;
+
+    font-size:13px;
+
+}
+
+@media(max-width:550px){
+
+.card{
+
+padding:28px;
+
+}
+
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="card">
-    <h2>Employee Login</h2>
 
-    <form method="POST" action="/employee">
+<div class="logo">
 
-        {% if not step %}
-            <select name="username" required>
-                <option value="">Select your name</option>
-                <option>Vaishnavi Tawde</option>
-                <option>Priya Kamble</option>
-                <option>Saurabh Jaiswal</option>
-                <option>Abhishek Giri</option>
-                <option>Priyanka Jadhav</option>
-                <option>Siba Sahu</option>
-                <option>Pratiksha Nikam</option>
-                <option>Saiprasad Malekar</option>
-                <option>Ganinath Bankar</option>
-                <option>Prashant Khaire</option>
-                <option>Nilesh Kamble</option>
-                <option>Pravin Phadtare</option>
-                <option>Vaibhav Dighe</option>
-            </select>
+👨‍💻
 
-        {% elif step == "create" %}
-            <input type="password" name="password" placeholder="Create password" required>
+</div>
 
-        {% elif step == "password" %}
-            <input type="password" name="password" placeholder="Enter password" required>
+<h2>Employee Login</h2>
 
-        {% elif step == "pending" %}
-            <div class="pending">
-                ⏳ Password reset request is pending manager approval
-            </div>
-        {% endif %}
+<div class="subtitle">
 
-        {% if step != "pending" %}
-            <button type="submit">Continue</button>
-        {% endif %}
+Login to manage your daily activities
 
-        {% if step and step != "pending" %}
-            <button
-                type="button"
-                onclick="requestReset()"
-                style="background:#ff5c5c;margin-top:10px;width:100%;">
-                🔐 Reset Password
-            </button>
-        {% endif %}
+</div>
 
-    </form>
+<form method="POST" action="/employee">
 
-    <!-- BACK BUTTON -->
-    <form action="/" method="get">
-        <button type="submit" class="back-btn">⬅ Back</button>
-    </form>
+{% if not step %}
 
-    {% with messages = get_flashed_messages() %}
-        {% if messages %}
-            <div class="error">{{ messages[0] }}</div>
-        {% endif %}
-    {% endwith %}
+<label>Select Employee</label>
+
+<select name="username" required>
+
+<option value="">Choose Employee</option>
+
+<option>Saurabh Jaiswal</option>
+<option>Abhishek Giri</option>
+<option>Priyanka Jadhav</option>
+<option>Siba Sahu</option>
+<option>Pratiksha Nikam</option>
+<option>Saiprasad Malekar</option>
+<option>Ganinath Bankar</option>
+<option>Prashant Khaire</option>
+<option>Nilesh Kamble</option>
+<option>Pravin Phadtare</option>
+<option>Vaibhav Dighe</option>
+<option>Priya Kamble</option>
+<option>Vaishnavi Tawde</option>
+
+</select>
+
+{% elif step=="create" %}
+
+<label>Create Password</label>
+
+<input
+type="password"
+name="password"
+placeholder="Create your password"
+required>
+
+{% elif step=="password" %}
+
+<label>Password</label>
+
+<input
+type="password"
+name="password"
+placeholder="Enter your password"
+required>
+
+{% elif step=="pending" %}
+
+<div class="pending">
+
+⏳ Password reset request is pending manager approval.
+
+</div>
+
+{% endif %}
+
+{% if step!="pending" %}
+
+<button
+type="submit"
+class="primary-btn">
+
+Continue →
+
+</button>
+
+{% endif %}
+
+{% if step and step!="pending" %}
+
+<button
+type="button"
+class="reset-btn"
+onclick="requestReset()">
+
+🔐 Reset Password
+
+</button>
+
+{% endif %}
+
+</form>
+
+<form action="/" method="get">
+
+<button
+type="submit"
+class="back-btn">
+
+← Back to Home
+
+</button>
+
+</form>
+
+{% with messages=get_flashed_messages() %}
+{% if messages %}
+
+<div class="error">
+
+{{ messages[0] }}
+
+</div>
+
+{% endif %}
+{% endwith %}
+
+<div class="footer">
+
+Daily Activity Tracker • Employee Portal
+
+</div>
+
 </div>
 
 <script>
-function requestReset() {
-    fetch("/request-reset", { method: "POST" })
-        .then(() => {
-            alert("Reset request sent to manager");
-            location.reload();
-        });
+
+function requestReset(){
+
+fetch("/request-reset",{
+
+method:"POST"
+
+})
+
+.then(()=>{
+
+alert("Reset request sent to manager.");
+
+location.reload();
+
+});
+
 }
+
 </script>
 
 </body>
+
 </html>

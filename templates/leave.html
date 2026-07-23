@@ -1,167 +1,280 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Apply Leave</title>
 
-    <style>
-        body{
-            margin:0;
-            min-height:100vh;
-            font-family:"Segoe UI",Arial,sans-serif;
-            background:linear-gradient(135deg,#667eea,#764ba2);
-            display:flex;
-            justify-content:center;
-            align-items:center;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-        .container{
-            width:900px;
-            background:#fff;
-            padding:30px 35px;
-            border-radius:20px;
-            box-shadow:0 20px 40px rgba(0,0,0,.25);
-        }
+<title>Apply Leave</title>
 
-        h2{
-            text-align:center;
-            margin-top:0;
-            color:#333;
-        }
+<style>
 
-        label{
-            display:block;
-            margin-top:14px;
-            font-weight:600;
-            color:#444;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
 
-        select,
-        input,
-        textarea{
-            width:100%;
-            padding:12px;
-            margin-top:6px;
-            border-radius:10px;
-            border:1px solid #ccc;
-            box-sizing:border-box;
-            font-family:inherit;
-        }
+body{
+    font-family:"Segoe UI",Arial,sans-serif;
+    background:linear-gradient(135deg,#667eea,#764ba2);
+    min-height:100vh;
+    padding:40px 20px;
+}
 
-        textarea{
-            resize:vertical;
-            min-height:90px;
-        }
+.container{
 
-        button{
-            width:100%;
-            margin-top:20px;
-            padding:12px;
-            border:none;
-            border-radius:25px;
-            background:#4b49ac;
-            color:#fff;
-            font-size:16px;
-            font-weight:600;
-            cursor:pointer;
-        }
+    max-width:1200px;
+    margin:auto;
 
-        button:hover{
-            background:#3f3db3;
-        }
+}
 
-        table{
-            width:100%;
-            border-collapse:collapse;
-            margin-top:35px;
-        }
+.card{
 
-        th{
-            background:#4b49ac;
-            color:#fff;
-            padding:12px;
-        }
+    background:white;
+    border-radius:24px;
+    box-shadow:0 20px 40px rgba(0,0,0,.18);
+    overflow:hidden;
 
-        td{
-            padding:14px;
-            text-align:center;
-            border-bottom:1px solid #eee;
-        }
+}
 
-        tr:hover{
-            background:#f4f4ff;
-        }
+/* ================= HEADER ================= */
 
-        .badge{
-            padding:6px 14px;
-            border-radius:20px;
-            color:#fff;
-            font-size:13px;
-            font-weight:600;
-        }
+.page-header{
 
-        .pending{background:#ff9800;}
-        .approved{background:#4caf50;}
-        .rejected{background:#f44336;}
-        .cancelled{background:#9e9e9e;}
+    background:linear-gradient(135deg,#4b49ac,#6a67ce);
+    color:white;
+    padding:30px;
+    text-align:center;
 
-        .badge-type{
-            display:inline-block;
-            margin-top:6px;
-            padding:4px 10px;
-            border-radius:12px;
-            color:#fff;
-            font-size:12px;
-            font-weight:600;
-        }
+}
 
-        .badge-halfday{background:#009688;}
-        .badge-compoff{background:#4caf50;}
-        .badge-weeklyoff{background:#2196f3;}
-        .badge-holiday{background:#9c27b0;}
+.page-header h2{
 
-        .cancel-btn{
-            padding:6px 12px;
-            border:none;
-            border-radius:20px;
-            background:#e53935;
-            color:#fff;
-            cursor:pointer;
-            font-size:13px;
-        }
+    font-size:32px;
+    margin-bottom:8px;
 
-        .cancel-btn:hover{
-            background:#c62828;
-        }
+}
 
-        .empty{
-            margin-top:30px;
-            padding:30px;
-            text-align:center;
-            background:#f1fff3;
-            color:#4caf50;
-            font-weight:600;
-            border-radius:12px;
-        }
+.page-header p{
 
-        .footer{
-            margin-top:30px;
-            text-align:center;
-        }
+    opacity:.9;
+    font-size:15px;
 
-        .back-link{
-            display:inline-block;
-            text-decoration:none;
-            padding:10px 24px;
-            border-radius:25px;
-            background:#999;
-            color:#fff;
-            font-weight:600;
-        }
+}
 
-        .back-link:hover{
-            background:#777;
-        }
-    </style>
+/* ================= CONTENT ================= */
+
+.content{
+
+    padding:35px;
+
+}
+
+/* ================= FLASH ================= */
+
+.flash{
+
+    background:#fff8e1;
+    color:#8a6d3b;
+    padding:16px;
+    border-radius:14px;
+    margin-bottom:25px;
+    text-align:center;
+    font-weight:600;
+
+}
+
+/* ================= FORM ================= */
+
+.form-card{
+
+    background:#f8f9ff;
+    border-radius:20px;
+    padding:30px;
+    border:1px solid #e5e8ff;
+    margin-bottom:35px;
+
+}
+
+.section-title{
+
+    font-size:22px;
+    color:#333;
+    margin-bottom:25px;
+    font-weight:700;
+
+}
+
+.grid{
+
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:22px;
+
+}
+
+.field{
+
+    display:flex;
+    flex-direction:column;
+
+}
+
+.field-full{
+
+    grid-column:1/-1;
+
+}
+
+label{
+
+    margin-bottom:8px;
+    color:#444;
+    font-weight:600;
+
+}
+
+select,
+input,
+textarea{
+
+    width:100%;
+    padding:13px 15px;
+    border:1px solid #d5d8ef;
+    border-radius:14px;
+    outline:none;
+    font-size:15px;
+    transition:.3s;
+
+}
+
+select:focus,
+input:focus,
+textarea:focus{
+
+    border-color:#4b49ac;
+    box-shadow:0 0 0 4px rgba(75,73,172,.12);
+
+}
+
+textarea{
+
+    resize:vertical;
+    min-height:110px;
+
+}
+
+/* ================= BUTTON ================= */
+
+.submit-btn{
+
+    margin-top:28px;
+    width:100%;
+    border:none;
+    background:linear-gradient(135deg,#4b49ac,#6a67ce);
+    color:white;
+    padding:15px;
+    border-radius:30px;
+    font-size:16px;
+    font-weight:700;
+    cursor:pointer;
+    transition:.3s;
+
+}
+
+.submit-btn:hover{
+
+    transform:translateY(-2px);
+    box-shadow:0 12px 25px rgba(75,73,172,.35);
+
+}
+
+/* ================= TABLE TITLE ================= */
+
+.table-title{
+
+    font-size:22px;
+    color:#333;
+    margin-bottom:20px;
+    font-weight:700;
+
+}
+
+/* ================= BADGES ================= */
+
+.badge{
+
+    padding:7px 14px;
+    border-radius:30px;
+    color:white;
+    font-size:13px;
+    font-weight:700;
+    display:inline-block;
+
+}
+
+.pending{
+
+    background:#ff9800;
+
+}
+
+.approved{
+
+    background:#4caf50;
+
+}
+
+.rejected{
+
+    background:#f44336;
+
+}
+
+.cancelled{
+
+    background:#9e9e9e;
+
+}
+
+.badge-type{
+
+    margin-top:8px;
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:18px;
+    color:white;
+    font-size:12px;
+    font-weight:600;
+
+}
+
+.badge-halfday{
+
+    background:#009688;
+
+}
+
+.badge-compoff{
+
+    background:#43a047;
+
+}
+
+.badge-weeklyoff{
+
+    background:#2196f3;
+
+}
+
+.badge-holiday{
+
+    background:#8e24aa;
+
+}
+
+</style>
 
 <script>
 
@@ -184,12 +297,17 @@ function toggleDates(type){
     const reasonDiv=document.getElementById("reasonDiv");
 
     if(type==="weeklyoff" || type==="holiday"){
+
         reasonDiv.style.display="none";
         document.getElementById("reason").required=false;
+
     }
+
     else{
+
         reasonDiv.style.display="block";
         document.getElementById("reason").required=true;
+
     }
 
 }
@@ -202,19 +320,22 @@ function toggleDates(type){
 
 <div class="container">
 
-<h2>🏖 Apply Leave</h2>
+<div class="card">
+
+<div class="page-header">
+
+<h2>🏖 Leave Management</h2>
+
+<p>Submit and track all your leave requests in one place.</p>
+
+</div>
+
+<div class="content">
 
 {% with messages = get_flashed_messages() %}
 {% if messages %}
 
-<div style="
-background:#fff3cd;
-color:#856404;
-padding:12px;
-border-radius:12px;
-margin-bottom:20px;
-font-weight:600;
-text-align:center;">
+<div class="flash">
 
 {{ messages[0] }}
 
@@ -223,7 +344,19 @@ text-align:center;">
 {% endif %}
 {% endwith %}
 
+<div class="form-card">
+
+<div class="section-title">
+
+📝 Apply for Leave
+
+</div>
+
 <form method="POST">
+
+<div class="grid">
+
+<div class="field">
 
 <label>Leave Type</label>
 
@@ -250,7 +383,12 @@ onchange="toggleDates(this.value)">
 
 </select>
 
-<div id="single" style="display:none;">
+</div>
+
+<div
+class="field"
+id="single"
+style="display:none;">
 
 <label>Select Date</label>
 
@@ -260,7 +398,10 @@ name="single_date">
 
 </div>
 
-<div id="range" style="display:none;">
+<div
+class="field"
+id="range"
+style="display:none;">
 
 <label>From Date</label>
 
@@ -268,7 +409,7 @@ name="single_date">
 type="date"
 name="from_date">
 
-<label>To Date</label>
+<label style="margin-top:18px;">To Date</label>
 
 <input
 type="date"
@@ -276,121 +417,180 @@ name="to_date">
 
 </div>
 
-<div id="reasonDiv">
+<div
+class="field field-full"
+id="reasonDiv">
 
 <label>Reason</label>
 
 <textarea
 id="reason"
 name="reason"
-placeholder="Enter reason..."
+placeholder="Enter leave reason..."
 required></textarea>
 
 </div>
 
-<button type="submit">
+</div>
 
-Submit
+<button
+type="submit"
+class="submit-btn">
+
+Submit Leave Request
 
 </button>
 
 </form>
 
-<h2 style="margin-top:20px;">
+</div>
 
-📋 Your Leave Requests
+<div class="table-title">
 
-</h2>
+📋 Leave Request History
+
+</div>
 
 {% if history %}
 
-<table>
+<div style="overflow-x:auto;">
 
-<tr>
+<table style="
+width:100%;
+border-collapse:collapse;
+background:white;
+border-radius:18px;
+overflow:hidden;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+">
 
-<th>Leave Dates</th>
+<thead>
 
-<th>Reason</th>
+<tr style="background:linear-gradient(135deg,#4b49ac,#6a67ce);color:white;">
 
-<th>Requested On</th>
+<th style="padding:16px;">Leave Date(s)</th>
 
-<th>Status</th>
+<th style="padding:16px;">Reason</th>
 
-<th>Action</th>
+<th style="padding:16px;">Requested On</th>
+
+<th style="padding:16px;">Status</th>
+
+<th style="padding:16px;">Action</th>
 
 </tr>
 
+</thead>
+
+<tbody>
+
 {% for h in history %}
 
-<tr>
+<tr style="border-bottom:1px solid #ececec;transition:.25s;">
 
-<td>
+<td style="padding:18px;text-align:center;">
+
+<strong>
 
 {{ h["leave_dates"] }}
+
+</strong>
 
 {% if h["leave_type"]=="halfday" %}
 
 <br>
+
 <span class="badge-type badge-halfday">
+
 Half Day
+
 </span>
 
 {% elif h["leave_type"]=="compoff" %}
 
 <br>
+
 <span class="badge-type badge-compoff">
+
 Comp-Off
+
 </span>
 
 {% elif h["leave_type"]=="weeklyoff" %}
 
 <br>
+
 <span class="badge-type badge-weeklyoff">
+
 Weekly Off
+
 </span>
 
 {% elif h["leave_type"]=="holiday" %}
 
 <br>
+
 <span class="badge-type badge-holiday">
+
 Holiday
+
 </span>
 
 {% endif %}
 
 </td>
 
-<td>
+<td style="padding:18px;text-align:center;">
 
 {{ h["reason"] or "-" }}
 
 </td>
 
-<td>
+<td style="padding:18px;text-align:center;">
 
 {{ h["requested_on"] }}
 
 </td>
 
-<td>
+<td style="padding:18px;text-align:center;">
 
 {% if h["status"]==0 %}
-<span class="badge pending">⏳ Pending</span>
+
+<span class="badge pending">
+
+⏳ Pending
+
+</span>
 
 {% elif h["status"]==2 %}
-<span class="badge approved">✅ Approved</span>
+
+<span class="badge approved">
+
+✅ Approved
+
+</span>
 
 {% elif h["status"]==3 %}
-<span class="badge rejected">❌ Rejected</span>
+
+<span class="badge rejected">
+
+❌ Rejected
+
+</span>
 
 {% elif h["status"]==4 %}
-<span class="badge cancelled">🗑 Cancelled</span>
+
+<span class="badge cancelled">
+
+🗑 Cancelled
+
+</span>
 
 {% endif %}
 
 </td>
 
-<td>
+<td style="padding:18px;text-align:center;">
 
 {% if h["status"] in [0,2] %}
 
@@ -406,8 +606,17 @@ value="{{ h['id'] }}">
 
 <button
 type="submit"
-class="cancel-btn"
-onclick="return confirm('Are you sure you want to cancel this leave?');">
+onclick="return confirm('Are you sure you want to cancel this leave?');"
+style="
+background:#ef5350;
+color:white;
+border:none;
+padding:9px 18px;
+border-radius:25px;
+cursor:pointer;
+font-weight:600;
+transition:.3s;
+">
 
 Cancel
 
@@ -417,7 +626,11 @@ Cancel
 
 {% else %}
 
--
+<span style="color:#999;">
+
+—
+
+</span>
 
 {% endif %}
 
@@ -427,23 +640,62 @@ Cancel
 
 {% endfor %}
 
+</tbody>
+
 </table>
+
+</div>
 
 {% else %}
 
-<div class="empty">
+<div style="
+background:#f5fff6;
+padding:40px;
+border-radius:18px;
+text-align:center;
+margin-top:20px;
+box-shadow:0 8px 18px rgba(0,0,0,.08);
+">
 
-No leave requests yet
+<div style="font-size:60px;">
+
+📅
+
+</div>
+
+<h3 style="margin-top:10px;color:#4caf50;">
+
+No Leave Requests Yet
+
+</h3>
+
+<p style="color:#666;margin-top:8px;">
+
+Your leave history will appear here once you submit a request.
+
+</p>
 
 </div>
 
 {% endif %}
 
-<div class="footer">
+<div style="
+display:flex;
+justify-content:center;
+margin-top:35px;
+">
 
 <a
 href="/dashboard"
-class="back-link">
+style="
+background:#6c757d;
+color:white;
+text-decoration:none;
+padding:14px 32px;
+border-radius:35px;
+font-weight:600;
+transition:.3s;
+">
 
 ⬅ Back to Dashboard
 
@@ -451,7 +703,130 @@ class="back-link">
 
 </div>
 
+<style>
+
+/* ================= HOVER EFFECTS ================= */
+
+tbody tr:hover{
+
+    background:#f7f8ff;
+
+}
+
+a:hover{
+
+    opacity:.9;
+
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media (max-width:992px){
+
+    .content{
+
+        padding:25px;
+
+    }
+
+    .page-header h2{
+
+        font-size:28px;
+
+    }
+
+}
+
+@media (max-width:768px){
+
+    body{
+
+        padding:20px 10px;
+
+    }
+
+    .card{
+
+        border-radius:18px;
+
+    }
+
+    .page-header{
+
+        padding:25px 20px;
+
+    }
+
+    .page-header h2{
+
+        font-size:24px;
+
+    }
+
+    .page-header p{
+
+        font-size:14px;
+
+    }
+
+    .content{
+
+        padding:20px;
+
+    }
+
+    .form-card{
+
+        padding:20px;
+
+    }
+
+    .grid{
+
+        grid-template-columns:1fr;
+
+    }
+
+    table{
+
+        min-width:900px;
+
+    }
+
+}
+
+@media (max-width:480px){
+
+    .submit-btn{
+
+        font-size:15px;
+
+        padding:13px;
+
+    }
+
+    .badge{
+
+        font-size:12px;
+
+        padding:6px 12px;
+
+    }
+
+    .badge-type{
+
+        font-size:11px;
+
+    }
+
+}
+
+</style>
+
+</div>
+
 </div>
 
 </body>
+
 </html>

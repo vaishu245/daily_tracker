@@ -1,89 +1,347 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
-    <title>Manager Login</title>
-    <style>
-        body {
-            background: #f4f6f9;
-            font-family: "Segoe UI";
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 16px;
-            width: 400px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        select, input {
-            width: 100%;
-            padding: 12px;
-            margin-top: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-        }
-        button {
-            width: 100%;
-            margin-top: 20px;
-            padding: 12px;
-            border-radius: 30px;
-            border: none;
-            background: #4b49ac;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-        .back-btn {
-            background: #ddd;
-            color: #333;
-        }
-        .error {
-            color: red;
-            text-align: center;
-            margin-top: 10px;
-        }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Manager Login</title>
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+
+    background:#eef5ff;
+
+    min-height:100vh;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    padding:30px;
+
+}
+
+.card{
+
+    width:450px;
+
+    background:white;
+
+    border-radius:25px;
+
+    padding:40px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.10);
+
+}
+
+.logo{
+
+    width:85px;
+    height:85px;
+
+    border-radius:50%;
+
+    background:linear-gradient(135deg,#5b7cff,#7b4dff);
+
+    margin:auto;
+
+    display:flex;
+
+    justify-content:center;
+
+    align-items:center;
+
+    font-size:38px;
+
+    color:white;
+
+    margin-bottom:25px;
+
+    box-shadow:0 12px 25px rgba(91,124,255,.35);
+
+}
+
+h2{
+
+    text-align:center;
+
+    color:#23395d;
+
+    margin-bottom:8px;
+
+}
+
+.subtitle{
+
+    text-align:center;
+
+    color:#777;
+
+    margin-bottom:35px;
+
+    font-size:15px;
+
+}
+
+label{
+
+    display:block;
+
+    font-weight:600;
+
+    margin-bottom:8px;
+
+    color:#444;
+
+}
+
+select,
+input{
+
+    width:100%;
+
+    padding:15px;
+
+    border-radius:14px;
+
+    border:1px solid #d6dbe6;
+
+    font-size:15px;
+
+    outline:none;
+
+    transition:.3s;
+
+    margin-bottom:22px;
+
+}
+
+select:focus,
+input:focus{
+
+    border-color:#5b7cff;
+
+    box-shadow:0 0 0 4px rgba(91,124,255,.15);
+
+}
+
+.primary-btn{
+
+    width:100%;
+
+    padding:16px;
+
+    border:none;
+
+    border-radius:14px;
+
+    background:#4f7cff;
+
+    color:white;
+
+    font-size:16px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.primary-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 25px rgba(79,124,255,.35);
+
+}
+
+.back-btn{
+
+    width:100%;
+
+    padding:15px;
+
+    margin-top:15px;
+
+    border:2px solid #4f7cff;
+
+    border-radius:14px;
+
+    background:white;
+
+    color:#4f7cff;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.back-btn:hover{
+
+    background:#4f7cff;
+
+    color:white;
+
+}
+
+.error{
+
+    margin-top:20px;
+
+    background:#ffe5e5;
+
+    color:#d8000c;
+
+    padding:12px;
+
+    border-radius:10px;
+
+    text-align:center;
+
+    font-size:14px;
+
+}
+
+.footer{
+
+    margin-top:25px;
+
+    text-align:center;
+
+    color:#999;
+
+    font-size:13px;
+
+}
+
+@media(max-width:500px){
+
+    .card{
+
+        padding:28px;
+
+    }
+
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="card">
+
+    <div class="logo">
+        👨‍💼
+    </div>
+
     <h2>Manager Login</h2>
+
+    <div class="subtitle">
+
+        Sign in to access the Manager Dashboard
+
+    </div>
 
     <form method="POST">
 
         {% if not step %}
-        <select name="manager_name" required>
-            <option value="">Select Manager</option>
-            <option>Vivek Gaur</option>
-            <option>Jayendra Sadaye</option>
-            <option>Vivence Rodrigues</option>
-            <option>Umesh Pawar</option>
-        </select>
+
+            <label>Select Manager</label>
+
+            <select name="manager_name" required>
+
+                <option value="">Choose Manager</option>
+
+                <option>Vivek Gaur</option>
+
+                <option>Jayendra Sadaye</option>
+
+                <option>Vivence Rodrigues</option>
+
+                <option>Umesh Pawar</option>
+
+            </select>
 
         {% elif step == "create" %}
-        <input type="password" name="password" placeholder="Create password" required>
+
+            <label>Create Password</label>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Create your password"
+                required>
 
         {% elif step == "password" %}
-        <input type="password" name="password" placeholder="Enter password" required>
+
+            <label>Password</label>
+
+            <input
+                type="password"
+                name="password"
+                placeholder="Enter your password"
+                required>
+
         {% endif %}
 
-        <button type="submit">Continue</button>
+        <button type="submit" class="primary-btn">
+
+            Continue →
+
+        </button>
+
     </form>
 
-    <!-- BACK TO WELCOME -->
     <form action="/">
-        <button type="submit" class="back-btn">⬅ Back</button>
+
+        <button class="back-btn">
+
+            ← Back to Home
+
+        </button>
+
     </form>
 
     {% with messages = get_flashed_messages() %}
     {% if messages %}
-        <div class="error">{{ messages[0] }}</div>
+        <div class="error">
+
+            {{ messages[0] }}
+
+        </div>
     {% endif %}
     {% endwith %}
+
+    <div class="footer">
+
+        Daily Activity Tracker • Manager Portal
+
+    </div>
+
 </div>
 
 </body>
+
 </html>

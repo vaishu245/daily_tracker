@@ -1,44 +1,185 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <style>
-        body {
-            background: #f4f6f9;
-            font-family: "Segoe UI";
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .card {
-            background: white;
-            padding: 50px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.15);
-        }
-        h2 { color: #28a745; }
-        button {
-            margin-top: 20px;
-            padding: 12px 30px;
-            border-radius: 30px;
-            border: none;
-            background: #4b49ac;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-        }
-    </style>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Success</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:'Poppins',sans-serif;
+}
+
+body{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#4b49ac,#6d67e4);
+    overflow:hidden;
+}
+
+body::before{
+    content:"";
+    position:absolute;
+    width:450px;
+    height:450px;
+    background:rgba(255,255,255,.08);
+    border-radius:50%;
+    top:-140px;
+    right:-120px;
+}
+
+body::after{
+    content:"";
+    position:absolute;
+    width:350px;
+    height:350px;
+    background:rgba(255,255,255,.06);
+    border-radius:50%;
+    bottom:-120px;
+    left:-100px;
+}
+
+.card{
+    position:relative;
+    z-index:2;
+    width:90%;
+    max-width:520px;
+    background:#fff;
+    border-radius:28px;
+    padding:50px 40px;
+    text-align:center;
+    box-shadow:0 25px 60px rgba(0,0,0,.25);
+    animation:fadeIn .6s ease;
+}
+
+.success-icon{
+    width:95px;
+    height:95px;
+    margin:auto;
+    border-radius:50%;
+    background:linear-gradient(135deg,#22c55e,#16a34a);
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:46px;
+    color:#fff;
+    box-shadow:0 12px 30px rgba(34,197,94,.35);
+    margin-bottom:25px;
+}
+
+h2{
+    color:#1f2937;
+    font-size:30px;
+    margin-bottom:15px;
+}
+
+p{
+    color:#6b7280;
+    font-size:16px;
+    line-height:1.7;
+    margin-bottom:35px;
+}
+
+button{
+    border:none;
+    outline:none;
+    cursor:pointer;
+    background:linear-gradient(135deg,#4b49ac,#6d67e4);
+    color:#fff;
+    padding:15px 34px;
+    border-radius:40px;
+    font-size:16px;
+    font-weight:600;
+    transition:.3s;
+    box-shadow:0 12px 25px rgba(75,73,172,.30);
+}
+
+button:hover{
+    transform:translateY(-3px);
+    box-shadow:0 18px 35px rgba(75,73,172,.35);
+}
+
+@keyframes fadeIn{
+
+    from{
+        opacity:0;
+        transform:translateY(25px);
+    }
+
+    to{
+        opacity:1;
+        transform:translateY(0);
+    }
+
+}
+
+@media(max-width:768px){
+
+    .card{
+        padding:40px 25px;
+    }
+
+    h2{
+        font-size:25px;
+    }
+
+    p{
+        font-size:15px;
+    }
+
+    button{
+        width:100%;
+    }
+
+}
+
+</style>
+
 </head>
+
 <body>
 
 <div class="card">
-    <h2>🎉 Activity Saved Successfully!</h2>
-    <p>Great job staying productive today.</p>
+
+    <div class="success-icon">
+
+        ✓
+
+    </div>
+
+    <h2>
+
+        Activity Saved Successfully!
+
+    </h2>
+
+    <p>
+
+        Your daily activity has been recorded successfully.
+        Keep up the great work and continue tracking your productivity.
+
+    </p>
 
     <form action="/dashboard">
-        <button>Back to Dashboard</button>
+
+        <button>
+
+            ⬅ Back to Dashboard
+
+        </button>
+
     </form>
+
 </div>
 
 </body>

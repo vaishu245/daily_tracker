@@ -1,60 +1,342 @@
 <!DOCTYPE html>
 <html>
 <head>
+    <title>Employee Dashboard</title>
+
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
     <style>
-        body {
-            background: #f4f6f9;
-            font-family: "Segoe UI";
-        }
-        .container {
-            max-width: 800px;
-            margin: 80px auto;
-            text-align: center;
-        }
-        .card {
-            background: white;
-            padding: 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
-        button {
-            width: 100%;
-            padding: 15px;
-            margin-top: 15px;
-            font-size: 16px;
-            border-radius: 30px;
-            border: none;
-            cursor: pointer;
-        }
-        .primary { background: #4b49ac; color: white; }
-        .secondary { background: #6c63ff; color: white; }
-        .leave { background: #ff9800; color: white; }
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
+
+body{
+    background:#eef4fb;
+}
+
+/* HEADER */
+
+.header{
+    height:75px;
+    background:white;
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    padding:0 40px;
+}
+
+.logo{
+    font-size:26px;
+    font-weight:bold;
+    color:#2d4db5;
+}
+
+.user{
+    background:#f3f6ff;
+    padding:12px 20px;
+    border-radius:40px;
+    font-weight:600;
+    color:#333;
+}
+
+/* MAIN */
+
+.container{
+    width:92%;
+    max-width:1250px;
+    margin:35px auto;
+}
+
+/* WELCOME */
+
+.banner{
+
+    background:linear-gradient(135deg,#4b49ac,#6d72ff);
+
+    color:white;
+
+    padding:35px;
+
+    border-radius:22px;
+
+    margin-bottom:35px;
+
+    box-shadow:0 15px 30px rgba(0,0,0,.15);
+
+}
+
+.banner h1{
+    font-size:34px;
+    margin-bottom:10px;
+}
+
+.banner p{
+    font-size:17px;
+    opacity:.95;
+}
+
+/* CARDS */
+
+.cards{
+
+    display:grid;
+
+    grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+
+    gap:25px;
+
+}
+
+.card{
+
+    background:white;
+
+    border-radius:22px;
+
+    padding:30px;
+
+    text-align:center;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
+    transition:.35s;
+
+}
+
+.card:hover{
+
+    transform:translateY(-8px);
+
+    box-shadow:0 20px 35px rgba(0,0,0,.15);
+
+}
+
+.icon{
+
+    font-size:55px;
+
+    margin-bottom:20px;
+
+}
+
+.card h2{
+
+    color:#333;
+
+    margin-bottom:12px;
+
+}
+
+.card p{
+
+    color:#777;
+
+    font-size:15px;
+
+    min-height:45px;
+
+}
+
+.card button{
+
+    margin-top:20px;
+
+    width:100%;
+
+    padding:14px;
+
+    border:none;
+
+    border-radius:35px;
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    color:white;
+
+}
+
+.blue{
+    background:#4b49ac;
+}
+
+.purple{
+    background:#6f6be3;
+}
+
+.orange{
+    background:#ff9800;
+}
+
+.red{
+    background:#ef5350;
+}
+
+/* FOOTER */
+
+.footer{
+
+    margin-top:40px;
+
+    text-align:center;
+
+    color:#888;
+
+    font-size:14px;
+
+}
+
+/* MOBILE */
+
+@media(max-width:768px){
+
+.header{
+
+padding:15px;
+
+height:auto;
+
+flex-direction:column;
+
+gap:15px;
+
+}
+
+.banner{
+
+padding:25px;
+
+}
+
+.banner h1{
+
+font-size:27px;
+
+}
+
+}
+
     </style>
+
 </head>
+
 <body>
 
-<div class="container">
-    <div class="card">
-        <h2>Welcome, {{ name }} 👋</h2>
-        <p>Your consistency today builds success tomorrow.</p>
+<div class="header">
 
-        <form action="/activity">
-            <button class="primary">Update Daily Activity</button>
-        </form>
-
-        <form action="/report">
-            <button class="secondary">View Report</button>
-        </form>
-
-        <!-- 🏖 NEW LEAVE BUTTON -->
-        <form action="/leave">
-            <button class="leave">Apply Leave</button>
-        </form>
-
-        <form action="/logout">
-            <button style="background:#ddd;">Logout</button>
-        </form>
+    <div class="logo">
+        Daily Activity Tracker
     </div>
+
+    <div class="user">
+        👤 {{ name }}
+    </div>
+
+</div>
+
+<div class="container">
+
+    <div class="banner">
+
+        <h1>Welcome, {{ name }} 👋</h1>
+
+        <p>
+            Your consistency today builds tomorrow's success.
+            Manage your activities, reports and leave from one place.
+        </p>
+
+    </div>
+
+    <div class="cards">
+
+        <div class="card">
+
+            <div class="icon">📝</div>
+
+            <h2>Update Activity</h2>
+
+            <p>
+                Record today's work and productive hours.
+            </p>
+
+            <form action="/activity">
+                <button class="blue">
+                    Open Activity
+                </button>
+            </form>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon">📊</div>
+
+            <h2>My Report</h2>
+
+            <p>
+                View your productivity and performance report.
+            </p>
+
+            <form action="/report">
+                <button class="purple">
+                    View Report
+                </button>
+            </form>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon">🏖️</div>
+
+            <h2>Apply Leave</h2>
+
+            <p>
+                Submit leave or comp-off requests.
+            </p>
+
+            <form action="/leave">
+                <button class="orange">
+                    Apply Leave
+                </button>
+            </form>
+
+        </div>
+
+        <div class="card">
+
+            <div class="icon">🚪</div>
+
+            <h2>Logout</h2>
+
+            <p>
+                Sign out from your account securely.
+            </p>
+
+            <form action="/logout">
+                <button class="red">
+                    Logout
+                </button>
+            </form>
+
+        </div>
+
+    </div>
+
+    <div class="footer">
+
+        Daily Activity Tracker • Employee Portal
+
+    </div>
+
 </div>
 
 </body>

@@ -1,150 +1,482 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
+
+    <meta charset="UTF-8">
+
+    <meta name="viewport"
+          content="width=device-width, initial-scale=1.0">
+
     <title>Daily Activity Tracker</title>
 
-    <style>
-        body {
-            margin: 0;
-            background: #f4f6f9;
-            font-family: "Segoe UI", Arial;
-        }
+<style>
 
-        .container {
-            max-width: 900px;
-            margin: 40px auto;
-        }
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+    font-family:"Segoe UI",sans-serif;
+}
 
-        .card {
-            background: white;
-            padding: 30px 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.1);
-        }
+body{
 
-        h2 {
-            margin-top: 0;
-            text-align: center;
-        }
+    background:#eef4fb;
 
-        .subtitle {
-            text-align: center;
-            color: #666;
-            margin-bottom: 30px;
-        }
+    color:#333;
 
-        .row {
-            display: flex;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+}
 
-        label {
-            font-size: 14px;
-            color: #555;
-        }
+/* ================= HEADER ================= */
 
-        input {
-            width: 100%;
-            padding: 10px;
-            border-radius: 8px;
-            border: 1px solid #ccc;
-            margin-top: 5px;
-            box-sizing: border-box;
-        }
+.header{
 
-        .activityRow {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr auto;
-            gap: 15px;
-            align-items: end;
-            margin-bottom: 15px;
-        }
+    background:white;
 
-        .remove-btn {
-            background: #ff4d4f;
-            color: white;
-            border: none;
-            padding: 8px 12px;
-            border-radius: 8px;
-            cursor: pointer;
-        }
+    height:75px;
 
-        .add-btn {
-            background: #4b49ac;
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 10px;
-        }
+    display:flex;
 
-        .submit-btn {
-            width: 100%;
-            padding: 14px;
-            font-size: 16px;
-            border-radius: 30px;
-            border: none;
-            background: #4b49ac;
-            color: white;
-            cursor: pointer;
-            margin-top: 30px;
-        }
+    justify-content:space-between;
 
-        .back-btn {
-            background: #ddd;
-            border: none;
-            padding: 10px 25px;
-            border-radius: 30px;
-            cursor: pointer;
-            margin-top: 15px;
-        }
+    align-items:center;
 
-        hr {
-            margin: 30px 0;
-            border: none;
-            border-top: 1px solid #eee;
-        }
-    </style>
+    padding:0 40px;
 
-    <script>
-        function addActivityRow(name="", start="", end="") {
-            const container = document.getElementById("activitiesContainer");
+    box-shadow:0 3px 15px rgba(0,0,0,.08);
 
-            const row = document.createElement("div");
-            row.className = "activityRow";
+}
 
-            row.innerHTML = `
-                <div>
-                    <label>Activity Name</label>
-                    <input type="text" name="activity_name[]" value="${name}" required>
-                </div>
+.logo{
 
-                <div>
-                    <label>Start Time</label>
-                    <input type="time" name="start_time[]" value="${start}" required>
-                </div>
+    font-size:26px;
 
-                <div>
-                    <label>End Time</label>
-                    <input type="time" name="end_time[]" value="${end}" required>
-                </div>
+    font-weight:bold;
 
-                <button type="button" class="remove-btn" onclick="removeRow(this)">✖</button>
-            `;
+    color:#2d4db5;
 
-            container.appendChild(row);
-        }
+}
 
-        function removeRow(btn) {
-            btn.parentElement.remove();
-        }
-    </script>
+.user{
+
+    background:#f2f5ff;
+
+    padding:12px 20px;
+
+    border-radius:40px;
+
+    font-weight:600;
+
+}
+
+/* ================= MAIN ================= */
+
+.container{
+
+    width:92%;
+
+    max-width:1200px;
+
+    margin:35px auto;
+
+}
+
+/* ================= CARD ================= */
+
+.card{
+
+    background:white;
+
+    border-radius:22px;
+
+    padding:35px;
+
+    box-shadow:0 15px 35px rgba(0,0,0,.08);
+
+}
+
+/* ================= TITLE ================= */
+
+.banner{
+
+    background:linear-gradient(135deg,#4b49ac,#6b6df5);
+
+    color:white;
+
+    border-radius:20px;
+
+    padding:28px;
+
+    margin-bottom:30px;
+
+}
+
+.banner h2{
+
+    margin-bottom:8px;
+
+    font-size:30px;
+
+}
+
+.banner p{
+
+    font-size:16px;
+
+    opacity:.95;
+
+}
+
+/* ================= ALERT ================= */
+
+.alert{
+
+    background:#fff3cd;
+
+    color:#856404;
+
+    padding:15px;
+
+    border-radius:12px;
+
+    margin-bottom:25px;
+
+    text-align:center;
+
+    font-weight:600;
+
+}
+
+/* ================= ROW ================= */
+
+.row{
+
+    display:grid;
+
+    grid-template-columns:repeat(3,1fr);
+
+    gap:20px;
+
+    margin-bottom:30px;
+
+}
+
+/* ================= INPUTS ================= */
+
+label{
+
+    display:block;
+
+    margin-bottom:8px;
+
+    font-size:14px;
+
+    font-weight:600;
+
+    color:#555;
+
+}
+
+input{
+
+    width:100%;
+
+    padding:14px;
+
+    border:1px solid #d7dbe6;
+
+    border-radius:12px;
+
+    outline:none;
+
+    transition:.3s;
+
+    font-size:15px;
+
+}
+
+input:focus{
+
+    border-color:#4b49ac;
+
+    box-shadow:0 0 0 4px rgba(75,73,172,.15);
+
+}
+
+/* ================= SECTION ================= */
+
+.section-title{
+
+    font-size:22px;
+
+    margin-bottom:20px;
+
+    color:#2d4db5;
+
+}
+
+/* ================= ACTIVITY ROW ================= */
+
+.activityRow{
+
+    display:grid;
+
+    grid-template-columns:2fr 1fr 1fr auto;
+
+    gap:18px;
+
+    align-items:end;
+
+    background:#f8faff;
+
+    padding:18px;
+
+    border-radius:18px;
+
+    margin-bottom:18px;
+
+    border:1px solid #edf1ff;
+
+}
+
+/* ================= BUTTONS ================= */
+
+.remove-btn{
+
+    background:#ef5350;
+
+    color:white;
+
+    border:none;
+
+    border-radius:12px;
+
+    width:46px;
+
+    height:46px;
+
+    cursor:pointer;
+
+    font-size:18px;
+
+    transition:.3s;
+
+}
+
+.remove-btn:hover{
+
+    background:#d32f2f;
+
+}
+
+.add-btn{
+
+    background:#4b49ac;
+
+    color:white;
+
+    border:none;
+
+    padding:14px 26px;
+
+    border-radius:40px;
+
+    font-size:15px;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+    margin-top:5px;
+
+}
+
+.add-btn:hover{
+
+    transform:translateY(-2px);
+
+    box-shadow:0 12px 22px rgba(75,73,172,.25);
+
+}
+
+.submit-btn{
+
+    width:100%;
+
+    padding:16px;
+
+    margin-top:28px;
+
+    background:#4caf50;
+
+    color:white;
+
+    border:none;
+
+    border-radius:40px;
+
+    font-size:17px;
+
+    cursor:pointer;
+
+    font-weight:bold;
+
+    transition:.3s;
+
+}
+
+.submit-btn:hover{
+
+    background:#43a047;
+
+}
+
+.back-btn{
+
+    width:100%;
+
+    padding:16px;
+
+    margin-top:15px;
+
+    border:2px solid #4b49ac;
+
+    border-radius:40px;
+
+    background:white;
+
+    color:#4b49ac;
+
+    font-weight:bold;
+
+    cursor:pointer;
+
+    transition:.3s;
+
+}
+
+.back-btn:hover{
+
+    background:#4b49ac;
+
+    color:white;
+
+}
+
+/* ================= RESPONSIVE ================= */
+
+@media(max-width:900px){
+
+.row{
+
+grid-template-columns:1fr;
+
+}
+
+.activityRow{
+
+grid-template-columns:1fr;
+
+}
+
+.header{
+
+height:auto;
+
+padding:18px;
+
+flex-direction:column;
+
+gap:15px;
+
+}
+
+}
+
+</style>
+
+<script>
+
+function addActivityRow(name="",start="",end=""){
+
+const container=document.getElementById("activitiesContainer");
+
+const row=document.createElement("div");
+
+row.className="activityRow";
+
+row.innerHTML=`
+
+<div>
+
+<label>Activity Name</label>
+
+<input
+type="text"
+name="activity_name[]"
+value="${name}"
+required>
+
+</div>
+
+<div>
+
+<label>Start Time</label>
+
+<input
+type="time"
+name="start_time[]"
+value="${start}"
+required>
+
+</div>
+
+<div>
+
+<label>End Time</label>
+
+<input
+type="time"
+name="end_time[]"
+value="${end}"
+required>
+
+</div>
+
+<button
+type="button"
+class="remove-btn"
+onclick="removeRow(this)">✖</button>
+
+`;
+
+container.appendChild(row);
+
+}
+
+function removeRow(btn){
+
+btn.parentElement.remove();
+
+}
+
+</script>
 
 </head>
 
 <body>
+
+<div class="header">
+
+    <div class="logo">
+        Daily Activity Tracker
+    </div>
+
+    <div class="user">
+        👤 {{ selected }}
+    </div>
+
+</div>
 
 <div class="container">
 
@@ -152,35 +484,37 @@
 
         {% with messages = get_flashed_messages() %}
             {% if messages %}
-                <div style="
-                    background:#fff3cd;
-                    color:#856404;
-                    padding:14px 18px;
-                    border-radius:12px;
-                    margin-bottom:20px;
-                    font-weight:600;
-                    text-align:center;
-                    box-shadow:0 4px 10px rgba(0,0,0,0.08);
-                ">
+
+                <div class="alert">
+
                     {{ messages[0] }}
+
                 </div>
+
             {% endif %}
         {% endwith %}
 
-        <h2>Daily Activity Tracker</h2>
+        <div class="banner">
 
-        <p class="subtitle">
-            Welcome <b>{{ selected }}</b> 👋
-            Fill in your activities for the day
-        </p>
+            <h2>Daily Activity Tracker</h2>
+
+            <p>
+
+                Welcome <b>{{ selected }}</b> 👋
+
+                <br><br>
+
+                Record your daily work activities and productive hours.
+
+            </p>
+
+        </div>
 
         <form method="POST">
 
-            <!-- Date & Clock -->
-
             <div class="row">
 
-                <div style="flex:1">
+                <div>
 
                     <label>Select Date</label>
 
@@ -194,7 +528,7 @@
 
                 </div>
 
-                <div style="flex:1">
+                <div>
 
                     <label>Clock In</label>
 
@@ -206,7 +540,7 @@
 
                 </div>
 
-                <div style="flex:1">
+                <div>
 
                     <label>Clock Out</label>
 
@@ -220,9 +554,11 @@
 
             </div>
 
-            <hr>
+            <h3 class="section-title">
 
-            <h3>📝 Activities</h3>
+                📝 Today's Activities
+
+            </h3>
 
             <div id="activitiesContainer">
 
@@ -272,7 +608,9 @@
                                 type="button"
                                 class="remove-btn"
                                 onclick="removeRow(this)">
+
                                 ✖
+
                             </button>
 
                         </div>
@@ -290,6 +628,7 @@
                             <input
                                 type="text"
                                 name="activity_name[]"
+                                placeholder="Enter activity"
                                 required>
 
                         </div>
@@ -322,27 +661,33 @@
 
             </div>
 
-            <button
+                        <button
                 type="button"
                 class="add-btn"
                 onclick="addActivityRow()">
-                ➕ Add Activity
+
+                ➕ Add Another Activity
+
             </button>
 
             <button
                 type="submit"
                 class="submit-btn">
-                💾 Save Activity
+
+                ✅ Save Activities
+
             </button>
 
         </form>
 
-        <form action="/dashboard" style="text-align:center;">
+        <form action="/dashboard">
 
             <button
                 type="submit"
                 class="back-btn">
+
                 ⬅ Back to Dashboard
+
             </button>
 
         </form>
@@ -353,3 +698,4 @@
 
 </body>
 </html>
+
