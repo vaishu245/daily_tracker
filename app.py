@@ -1309,12 +1309,17 @@ def report():
 
     leave_dates_dict = {}
 
+    leave_count = 0
+    non_working_days = 0
+
     for r in leave_rows:
 
-        txt = r["leave_dates"]
-        leave_type = r["leave_type"]
+        txt = (r["leave_dates"] or "").strip()
+        leave_type = (r["leave_type"] or "").strip().lower()
 
         if leave_type == "weeklyoff":
+            display_text = "Weekly Off"
+        elif leave_type == "weekly off":
             display_text = "Weekly Off"
         elif leave_type == "holiday":
             display_text = "Holiday"
@@ -1325,28 +1330,40 @@ def report():
         else:
             display_text = "Leave"
 
+        def process_day(d):
+
+            nonlocal leave_count, non_working_days
+
+            if d.month != int(selected_month) or d.year != int(selected_year):
+                return
+
+            leave_dates_dict[d] = display_text
+
+            if leave_type in ["weeklyoff", "weekly off", "holiday", "compoff"]:
+                non_working_days += 1
+            else:
+                leave_count += 1
+
         if "to" in txt:
 
             s, e = txt.split(" to ")
-            d1 = datetime.strptime(s, "%Y-%m-%d").date()
-            d2 = datetime.strptime(e, "%Y-%m-%d").date()
+
+            d1 = datetime.strptime(s.strip(), "%Y-%m-%d").date()
+            d2 = datetime.strptime(e.strip(), "%Y-%m-%d").date()
 
             while d1 <= d2:
-                if d1.month == int(selected_month) and d1.year == int(selected_year):
-                    leave_dates_dict[d1] = display_text
+                process_day(d1)
                 d1 += timedelta(days=1)
 
         else:
 
             d = datetime.strptime(txt, "%Y-%m-%d").date()
-
-            if d.month == int(selected_month) and d.year == int(selected_year):
-                leave_dates_dict[d] = display_text
+            process_day(d)
 
     # -------- BUILD REPORT TABLE --------
     report_data = []
+
     total_minutes = 0
-    leave_count = len(leave_dates_dict)
 
     all_dates = set(daily_minutes.keys()) | set(leave_dates_dict.keys())
 
@@ -1365,6 +1382,7 @@ def report():
         else:
 
             mins = daily_minutes.get(d, 0)
+
             hrs = mins // 60
             rem = mins % 60
 
@@ -1382,19 +1400,24 @@ def report():
 
     # -------- CARDS --------
     productive_hours = total_minutes / 60
+
     working_days = len(daily_minutes)
+
     available_hours = working_days * 7
+
+    available_hours_with_leave = (working_days + leave_count) * 7
+
     idle_hours = max(available_hours - productive_hours, 0)
 
     productivity = (
-        (productive_hours / available_hours) * 100
-        if available_hours > 0 else 0
+        (productive_hours / available_hours_with_leave) * 100
+        if available_hours_with_leave > 0 else 0
     )
 
     cards = {
         "productive": f"{int(productive_hours)} hrs {int((productive_hours % 1) * 60)} min",
         "working_days": working_days,
-        "available": f"{available_hours} hrs",
+        "available": f"{available_hours_with_leave} hrs",
         "idle": f"{int(idle_hours)} hrs {int((idle_hours % 1) * 60)} min",
         "productivity": f"{productivity:.2f}%",
         "leaves": leave_count
