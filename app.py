@@ -919,6 +919,7 @@ def manager_dashboard():
     # ---------------- LEAVE MAPS ----------------
     leave_map = {}
     compoff_map = {}
+    weeklyoff_map = {}
 
     selected_month_int = int(selected_month)
     selected_year_int = int(selected_year)
@@ -929,6 +930,19 @@ def manager_dashboard():
         leave_type = (r["leave_type"] or "").strip().lower()
         dates = (r["leave_dates"] or "").strip()
 
+        def process_day(current_date):
+
+            value = 0.5 if leave_type == "halfday" else 1
+
+            if leave_type == "compoff":
+                compoff_map[user] = compoff_map.get(user, 0) + value
+
+            elif leave_type in ["weekly off", "weeklyoff", "holiday"]:
+                weeklyoff_map[user] = weeklyoff_map.get(user, 0) + value
+
+            else:
+                leave_map[user] = leave_map.get(user, 0) + value
+
         # -------- SINGLE DATE --------
         if "to" not in dates:
 
@@ -936,14 +950,7 @@ def manager_dashboard():
                 d = datetime.strptime(dates, "%Y-%m-%d")
 
                 if d.month == selected_month_int and d.year == selected_year_int:
-
-                    value = 0.5 if leave_type == "halfday" else 1
-
-                    if leave_type == "compoff":
-                        compoff_map[user] = compoff_map.get(user, 0) + value
-
-                    elif leave_type not in ["weekly off", "weeklyoff", "holiday"]:
-                        leave_map[user] = leave_map.get(user, 0) + value
+                    process_day(d)
 
             except:
                 pass
@@ -963,22 +970,7 @@ def manager_dashboard():
                         current.month == selected_month_int
                         and current.year == selected_year_int
                     ):
-
-                        value = 0.5 if leave_type == "halfday" else 1
-
-                        if leave_type == "compoff":
-                            compoff_map[user] = (
-                                compoff_map.get(user, 0) + value
-                            )
-
-                        elif leave_type not in [
-                            "weekly off",
-                            "weeklyoff",
-                            "holiday"
-                        ]:
-                            leave_map[user] = (
-                                leave_map.get(user, 0) + value
-                            )
+                        process_day(current)
 
                     current += timedelta(days=1)
 
@@ -992,7 +984,6 @@ def manager_dashboard():
     total_available_all = 0
     total_available_with_leave_all = 0
 
-
     for r in activity_rows:
 
         username = r["username"]
@@ -1005,13 +996,18 @@ def manager_dashboard():
 
         compoff_days = compoff_map.get(username, 0)
 
+        weeklyoff_days = weeklyoff_map.get(username, 0)
+
         half_days = 0
 
         if leave_days % 1 != 0:
             half_days = 1
 
+        # ---------------- HOURS ----------------
         available_hours = working_days * 7
 
+        # Only actual Leave affects productivity.
+        # Weekly Off & Comp-Off are treated as Non Working Days.
         available_hours_with_leave = (working_days + leave_days) * 7
 
         ideal_hours = max(available_hours - productive_hours, 0)
@@ -1029,8 +1025,6 @@ def manager_dashboard():
         )
         productivity_with_leave = round(productivity_with_leave, 1)
 
-
-
         total_productive_all += productive_hours
         total_available_all += available_hours
         total_available_with_leave_all += available_hours_with_leave
@@ -1046,6 +1040,7 @@ def manager_dashboard():
             "productivity_with_leave": productivity_with_leave,
             "leave_days": leave_days,
             "compoff_days": compoff_days,
+            "weeklyoff_days": weeklyoff_days,
             "half_days": half_days
         })
 
