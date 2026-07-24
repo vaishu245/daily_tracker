@@ -1413,6 +1413,7 @@ def report():
         (productive_hours / available_hours_with_leave) * 100
         if available_hours_with_leave > 0 else 0
     )
+    non_working_count = non_working_days
 
     cards = {
         "productive": f"{int(productive_hours)} hrs {int((productive_hours % 1) * 60)} min",
@@ -1420,7 +1421,8 @@ def report():
         "available": f"{available_hours_with_leave} hrs",
         "idle": f"{int(idle_hours)} hrs {int((idle_hours % 1) * 60)} min",
         "productivity": f"{productivity:.2f}%",
-        "leaves": leave_count
+        "leaves": leave_count,
+        "non_working": non_working_count
     }
 
     # -------- SELECTED DAY ACTIVITIES --------
