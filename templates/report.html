@@ -301,71 +301,90 @@ body{
 
     overflow-x:auto;
 
+    background:white;
+
+    padding:15px;
+
+    border-radius:18px;
+
+    box-shadow:0 10px 25px rgba(0,0,0,.08);
+
 }
 
 table{
-
     width:100%;
-
-    border-collapse:collapse;
-
-    margin-top:10px;
-
-    background:white;
-
+    border-collapse:separate;
+    border-spacing:0 10px;
+    background:transparent;
 }
 
 th{
-
     background:#4b49ac;
-
     color:white;
-
-    padding:14px;
-
-    text-align:center;
-
+    padding:15px;
     font-size:14px;
+    text-align:center;
+}
 
+th:first-child{
+    border-radius:12px 0 0 12px;
+}
+
+th:last-child{
+    border-radius:0 12px 12px 0;
 }
 
 td{
-
-    padding:14px;
-
-    border-bottom:1px solid #e8ebf5;
-
+    background:#fff;
+    padding:16px;
     text-align:center;
-
     font-size:14px;
-
+    border-top:1px solid #eef2ff;
+    border-bottom:1px solid #eef2ff;
 }
 
-tr:nth-child(even){
+td:first-child{
+    border-left:4px solid #6b6df5;
+    border-radius:12px 0 0 12px;
+}
+
+td:last-child{
+    border-radius:0 12px 12px 0;
+}
+
+tbody tr:nth-child(even) td{
 
     background:#f8faff;
 
 }
 
-tr:hover{
+tbody tr:hover td{
 
     background:#eef3ff;
+
+    transform:translateY(-2px);
+
+    transition:.25s;
+
+    box-shadow:0 6px 18px rgba(75,73,172,.12);
 
 }
 
 td a{
 
-    color:#4b49ac;
+    color:#2d4db5;
 
-    font-weight:600;
+    font-weight:700;
 
     text-decoration:none;
+
+    transition:.25s;
 
 }
 
 td a:hover{
 
-    text-decoration:underline;
+    color:#6b6df5;
 
 }
 
@@ -668,9 +687,21 @@ Apply Filter
 
 <table>
 
+<thead>
+
 <tr>
 
 <th>Date</th>
+<th>Total Working Time</th>
+<th>Productivity</th>
+<th>Clock In</th>
+<th>Clock Out</th>
+
+</tr>
+
+</thead>
+
+<tbody>
 
 <th>Total Working Time</th>
 
@@ -696,7 +727,21 @@ Apply Filter
 
 </td>
 
-<td>{{ row.time }}</td>
+<td
+{% if row.time == "Leave" %}
+style="color:#e53935;font-weight:700;"
+{% elif row.time == "Weekly Off" %}
+style="color:#3949ab;font-weight:700;"
+{% elif row.time == "Holiday" %}
+style="color:#00897b;font-weight:700;"
+{% elif row.time == "Comp-Off" %}
+style="color:#8e24aa;font-weight:700;"
+{% elif row.time == "Half Day" %}
+style="color:#fb8c00;font-weight:700;"
+{% endif %}
+>
+{{ row.time }}
+</td>
 
 <td>{{ row.productivity }}</td>
 
@@ -720,6 +765,8 @@ No activity available for this month.
 
 {% endfor %}
 
+</tbody>
+
 </table>
 
 </div>
@@ -741,6 +788,8 @@ No activity available for this month.
 
 <table>
 
+<thead>
+
 <tr>
 
 <th>Activity</th>
@@ -752,6 +801,10 @@ No activity available for this month.
 <th>Duration</th>
 
 </tr>
+
+</thead>
+
+<tbody>
 
 {% for a in day_activities %}
 
