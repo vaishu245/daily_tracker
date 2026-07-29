@@ -509,12 +509,6 @@ Monitor productivity, attendance and team performance.
 🔐 Reset Requests ({{ pending_count }})
 </a>
 
-{% else %}
-
-<span class="header-link ok">
-✅ No Reset Requests
-</span>
-
 {% endif %}
 
 {% if leave_pending_count > 0 %}
@@ -522,12 +516,6 @@ Monitor productivity, attendance and team performance.
 <a href="/manager/leave-requests" class="header-link leave">
 🏖 Leave Requests ({{ leave_pending_count }})
 </a>
-
-{% else %}
-
-<span class="header-link ok">
-✅ No Leave Requests
-</span>
 
 {% endif %}
 
@@ -634,53 +622,6 @@ Apply Filter
 </div>
 
 </div>
-
-</div>
-<div class="dashboard-summary">
-
-    <div class="kpi-grid">
-
-        <div class="kpi">
-            <h4>Total Employees</h4>
-            <p>{{ data|length }}</p>
-        </div>
-
-        <div class="kpi">
-            <h4>Avg Productive Hours</h4>
-            <p>{{ (data | map(attribute='productive') | sum / (data|length or 1)) | round(1) }}</p>
-        </div>
-
-        <div class="kpi">
-            <h4>Avg Ideal Hours</h4>
-            <p>{{ (data | map(attribute='ideal') | sum / (data|length or 1)) | round(1) }}</p>
-        </div>
-
-        <div class="kpi">
-            <h4>Total Approved Leaves</h4>
-            <p>{{ data | map(attribute='leave_days') | sum }}</p>
-        </div>
-
-        <div class="kpi">
-            <h4>Overall Productivity<br>(Working Days)</h4>
-            <p>{{ overall_productivity }}%</p>
-        </div>
-
-        <div class="kpi">
-            <h4>Overall Productivity<br>(Incl. Leaves)</h4>
-            <p>{{ overall_productivity_with_leave }}%</p>
-        </div>
-
-    </div>
-
-    <div class="chart-card">
-
-        <h3>📈 Productivity vs Idle</h3>
-
-        <div class="chart-wrapper">
-            <canvas id="prodChart"></canvas>
-        </div>
-
-    </div>
 
 </div>
 
