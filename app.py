@@ -1020,8 +1020,8 @@ def manager_dashboard():
         productivity = round(productivity, 1)
 
         productivity_with_leave = (
-            (productive_hours / available_hours_with_leave) * 100
-            if available_hours_with_leave > 0 else 0
+            (productive_hours / available_hours) * 100
+            if available_hours > 0 else 0
         )
         productivity_with_leave = round(productivity_with_leave, 1)
 
