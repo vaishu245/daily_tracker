@@ -946,12 +946,8 @@ datalabels:{
     align:"end",
     offset:8,
 
-    formatter:function(value,context){
-
-        return context.dataIndex===0
-            ? value.toFixed(2) + "%"
-            : "";
-
+    formatter:function(value){
+        return value.toFixed(2) + "%";
     }
 
 }
