@@ -1413,6 +1413,12 @@ def report():
         (productive_hours / available_hours_with_leave) * 100
         if available_hours_with_leave > 0 else 0
     )
+    # Productivity for Pie Chart (Working Days Only)
+    chart_productivity = (
+        (productive_hours / (productive_hours + idle_hours)) * 100
+        if (productive_hours + idle_hours) > 0 else 0
+    )
+
     non_working_count = non_working_days
 
     cards = {
@@ -1421,6 +1427,7 @@ def report():
         "available": f"{available_hours_with_leave} hrs",
         "idle": f"{int(idle_hours)} hrs {int((idle_hours % 1) * 60)} min",
         "productivity": f"{productivity:.2f}%",
+        "chart_productivity": round(chart_productivity, 2),
         "leaves": leave_count,
         "non_working": non_working_count
     }
