@@ -255,8 +255,10 @@ body{
 
 .chart-wrapper{
     width:100%;
-    max-width:290px;
-    aspect-ratio:1;
+    max-width:320px;
+    height:320px;
+    position:relative;
+    overflow:visible;
 }
 
 /* =========================
@@ -750,6 +752,15 @@ new Chart(document.getElementById("prodChart"),{
 
         cutout:"70%",
 
+        layout:{
+            padding:{
+                top:30,
+                right:35,
+                bottom:30,
+                left:35
+            }
+        },
+
         plugins:{
 
             legend:{
@@ -764,22 +775,26 @@ new Chart(document.getElementById("prodChart"),{
 
             datalabels:{
 
-                color:"#fff",
+                color:"#000",
 
                 font:{
-                    size:15,
+                    size:14,
                     weight:"bold"
                 },
 
-                formatter:function(value,context){
+                formatter:function(value){
+                    return value+"%";
+                },
 
-                    if(context.dataIndex===0){
-                        return value+"%";
-                    }
+                anchor:"end",
 
-                    return "";
+                align:"end",
 
-                }
+                offset:15,
+
+                clamp:false,
+
+                clip:false
 
             }
 
