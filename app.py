@@ -1020,8 +1020,8 @@ def manager_dashboard():
         productivity = round(productivity, 1)
 
         productivity_with_leave = (
-            (productive_hours / available_hours) * 100
-            if available_hours > 0 else 0
+            (productive_hours / available_hours_with_leave) * 100
+            if available_hours_with_leave > 0 else 0
         )
         productivity_with_leave = round(productivity_with_leave, 1)
 
@@ -1410,8 +1410,8 @@ def report():
     idle_hours = max(available_hours - productive_hours, 0)
 
     productivity = (
-        (productive_hours / available_hours_with_leave) * 100
-        if available_hours_with_leave > 0 else 0
+        (productive_hours / available_hours) * 100
+        if available_hours > 0 else 0
     )
     # Productivity for Pie Chart (Working Days Only)
     chart_productivity = (
