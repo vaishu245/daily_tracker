@@ -935,23 +935,24 @@ weight:"bold"
 
 datalabels:{
 
-color:"#fff",
+    color:"#000",
 
-font:{
+    font:{
+        size:13,
+        weight:"bold"
+    },
 
-size:16,
+    anchor:"end",
+    align:"end",
+    offset:8,
 
-weight:"bold"
+    formatter:function(value,context){
 
-},
+        return context.dataIndex===0
+            ? value.toFixed(2) + "%"
+            : "";
 
-formatter:function(value,index){
-
-return index.dataIndex==0
-? value+"%"
-: "";
-
-}
+    }
 
 }
 
