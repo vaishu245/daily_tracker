@@ -1424,7 +1424,7 @@ def report():
     cards = {
         "productive": f"{int(productive_hours)} hrs {int((productive_hours % 1) * 60)} min",
         "working_days": working_days,
-        "available": f"{available_hours_with_leave} hrs",
+        "available": f"{available_hours} hrs",
         "idle": f"{int(idle_hours)} hrs {int((idle_hours % 1) * 60)} min",
         "productivity": f"{productivity:.2f}%",
         "chart_productivity": round(chart_productivity, 2),
